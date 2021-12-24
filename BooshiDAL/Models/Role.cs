@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace BooshiDAL.Models
         [Key]
         public int Id { get; set; }
         public string RoleName { get; set; }
+        [JsonIgnore]
         public List<User> Users { get; set; }
     }
 }

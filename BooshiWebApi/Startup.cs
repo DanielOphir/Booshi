@@ -20,6 +20,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Net.Http;
+using BooshiWebApi.Filters;
 
 namespace BooshiWebApi
 {
@@ -36,16 +37,11 @@ namespace BooshiWebApi
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddCors();
-            services.AddScoped<JwtService>();
-            services.AddScoped<MailService>();
-            //services.AddScoped<DeliveryService>();
-
-            services.AddDbContext<BooshiDBContext>(options =>
+            
+            services.AddControllers(options =>
             {
-                options.UseSqlServer(Configuration.GetConnectionString("BooshiDB"));
-            });
-            services.AddControllers().AddNewtonsoftJson(options =>
+                options.Filters.Add(new MyActionFilter());
+            }).AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
@@ -54,7 +50,14 @@ namespace BooshiWebApi
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BooshiWebApi", Version = "v1" });
             });
+            services.AddCors();
+            services.AddScoped<JwtService>();
+            services.AddScoped<MailService>();
 
+            services.AddDbContext<BooshiDBContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("BooshiDB"));
+            });
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = "JwtBearer";

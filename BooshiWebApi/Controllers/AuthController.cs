@@ -44,7 +44,6 @@ namespace BooshiWebApi.Controllers
                 Password = BCrypt.Net.BCrypt.HashPassword(registerModel.Password),
                 Email = registerModel.Email,
                 RoleId = registerModel.RoleId,
-                Role = _context.Roles.FirstOrDefault(r => r.Id == registerModel.RoleId)
             };
             var newUserDetails = new UserDetails
             {
@@ -59,9 +58,7 @@ namespace BooshiWebApi.Controllers
             };
             try
             {
-               await _context.Users.AddAsync(newUser);
-               await _context.UsersDetails.AddAsync(newUserDetails);
-               await _context.SaveChangesAsync();
+                await _context.AddUserAsync(newUser, newUserDetails);
                 _mailService.SendMail(newUser.Email, "Registration complete", "Ty for signing up to our delivery service, we wish you a great.");
                return Created("", newUser);
             }
@@ -96,17 +93,8 @@ namespace BooshiWebApi.Controllers
         {
             User user;
             var jwtToken = Request.Cookies["jwt"];
-            if (jwtToken == null)
-                return StatusCode(203);
-            try { 
-                var userId = _jwtService.GetUserByTokenAsync(jwtToken);
-                user = await _context.GetUserByIdAsync(userId);
-            }
-            catch (SecurityTokenExpiredException) {
-                Response.Cookies.Delete("jwt");
-                return StatusCode(203);
-            }
-            catch (Exception ex) { return BadRequest(ex.Message); }
+            var userId = _jwtService.GetUserByTokenAsync(jwtToken);
+            user = await _context.GetUserByIdAsync(userId);
             return Ok(user);
         }
 

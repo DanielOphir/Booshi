@@ -44,7 +44,7 @@ namespace BooshiWebApi.Controllers
             return NoContent();
         }
 
-        [HttpPut("update/{id}")]
+        [HttpPut("update")]
         public async Task<IActionResult> UpdateUser(FullUser user)
         {
             var foundUser = await _context.UpdateUserAsync(user);
@@ -67,7 +67,7 @@ namespace BooshiWebApi.Controllers
         }
 
         [HttpDelete("delete")]
-        public IActionResult DeleteUser(Guid id)
+        public IActionResult DeleteUser([FromBody]Guid id)
         {
             var isDeleted = _context.DeleteUserByIdAsync(id);
             if (isDeleted.Result) return Ok("deleted");

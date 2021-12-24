@@ -26,6 +26,7 @@ namespace BooshiWebApi.Controllers
             this._jwtService = jwtService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllDeliveriesAsync()
         {
@@ -37,7 +38,7 @@ namespace BooshiWebApi.Controllers
         }
 
         [Authorize(Roles= "Admin")]
-        [HttpGet("/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetUserDeliveriesByIdAsync(Guid id)
         {
             var deliveries = await _context.GetUserDeliveries(id);
@@ -49,17 +50,8 @@ namespace BooshiWebApi.Controllers
         [HttpGet("user")]
         public async Task<IActionResult> GetUserDeliveriesAsync()
         {
-            Guid userId;
-            var jwtToken = Request.Cookies["jwt"];
-            if (jwtToken == null)
-                return StatusCode(203);
-            try { userId = _jwtService.GetUserByTokenAsync(jwtToken); }
-            catch (SecurityTokenExpiredException)
-            {
-                Response.Cookies.Delete("jwt");
-                return StatusCode(203);
-            }
-            catch (Exception ex) { return BadRequest(ex.Message); }
+            string jwtToken = Request.Cookies["jwt"];
+            Guid userId = _jwtService.GetUserByTokenAsync(jwtToken);
             var deliveries = await _context.GetUserDeliveries(userId);
             if (deliveries.Count < 1)
                 return NoContent();

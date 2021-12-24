@@ -124,6 +124,27 @@ namespace BooshiDAL
             return await usersList.ToListAsync();
         }
 
+        public async Task<FullUser> AddUserAsync(User user, UserDetails userDetails)
+        {
+            await this.Users.AddAsync(user);
+            await this.UsersDetails.AddAsync(userDetails);
+            await this.SaveChangesAsync();
+            var fullUser = new FullUser
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                RoleId = user.RoleId,
+                FirstName = userDetails.FirstName,
+                LastName = userDetails.LastName,
+                PhoneNumber = userDetails.PhoneNumber,
+                City = userDetails.City,
+                Street = userDetails.Street,
+                ZipCode = userDetails.ZipCode
+            };
+            return fullUser;
+        }
+
         public string GetRoleNameByUserId(Guid id)
         {
             var user = GetUserByIdAsync(id).Result;
@@ -131,4 +152,6 @@ namespace BooshiDAL
             return role;
         }
     }
+
+
 }
