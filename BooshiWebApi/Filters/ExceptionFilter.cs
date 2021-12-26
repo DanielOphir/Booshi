@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BooshiWebApi.Filters
 {
-    public class MyActionFilter : IExceptionFilter
+    public class ExceptionFilter : IExceptionFilter
     {
         public void OnException(ExceptionContext context)
         {
