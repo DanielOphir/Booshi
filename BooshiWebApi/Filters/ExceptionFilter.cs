@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BooshiWebApi.Filters
 {
-    public class MyActionFilter : IExceptionFilter
+    public class ExceptionFilter : IExceptionFilter
     {
         public void OnException(ExceptionContext context)
         {
@@ -31,6 +31,7 @@ namespace BooshiWebApi.Filters
             if (context.Exception is Exception)
             {
                 context.HttpContext.Response.StatusCode = 400;
+                httpContext.Response.WriteAsJsonAsync(new { Message = context.Exception.Message });
                 context.ExceptionHandled = true;
                 return;
             }

@@ -11,6 +11,7 @@ namespace BooshiDAL
         DbSet<Role> Roles { get; set; }
         DbSet<UserDetails> UsersDetails { get; set; }
         DbSet<Delivery> Deliveries { get; set; }
+        DbSet<DeliveryPerson> DeliveryPeople { get; set; }
         DbSet<DeliveryStatus> DeliveryStatuses { get; set; }
         DbSet<Origin> Origins { get; set; }
         DbSet<Destination> Destinations { get; set; }
@@ -29,8 +30,15 @@ namespace BooshiDAL
 
             modelBuilder.Entity<Delivery>().Property(d => d.Created).HasDefaultValueSql("getdate()");
             modelBuilder.Entity<Delivery>().Property(d => d.Id).UseIdentityColumn(3000, 1);
+            modelBuilder.Entity<Delivery>().HasOne(x => x.DeliveryPerson).WithMany(x => x.Deliveries).HasForeignKey(x => x.DeliveryPersonId);
+            modelBuilder.Entity<Delivery>().HasOne(x => x.User).WithMany(x => x.Deliveries).HasForeignKey(x => x.UserId);
+
+            modelBuilder.Entity<DeliveryPerson>().HasMany(x => x.Deliveries).WithOne(x => x.DeliveryPerson).HasForeignKey(x => x.DeliveryPersonId);
+
             modelBuilder.Entity<Origin>().HasOne(x => x.Delivery).WithOne(x => x.Origin).HasForeignKey<Origin>(x => x.DeliveryId).IsRequired();
+
             modelBuilder.Entity<Destination>().HasOne(x => x.Delivery).WithOne(x => x.Destination).HasForeignKey<Destination>(x => x.DeliveryId).IsRequired();
+
             base.OnModelCreating(modelBuilder);
 
         }

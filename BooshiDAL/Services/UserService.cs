@@ -40,19 +40,7 @@ namespace BooshiDAL
         public FullUser GetUserInfoById(Guid id)
         {
             var user = this.Users.Join(this.UsersDetails, u => u.Id, u => u.UserId, (u, ud) => new
-            FullUser
-            {
-                Id = u.Id,
-                UserName = u.UserName,
-                Email = u.Email,
-                RoleId = u.RoleId,
-                FirstName = ud.FirstName,
-                LastName = ud.LastName,
-                City = ud.City,
-                ZipCode = ud.ZipCode,
-                PhoneNumber = ud.PhoneNumber,
-                Street = ud.Street
-            }).ToList().FirstOrDefault(u => u.Id == id);
+            FullUser(u, ud)).FirstOrDefault(u => u.Id == id);
             return user;
         }
 
@@ -109,18 +97,7 @@ namespace BooshiDAL
         /// <returns>List of all full users information</returns>
         public async Task<List<FullUser>> GetAllUsersAsync()
         {
-            var usersList = this.Users.Join(this.UsersDetails, u => u.Id, u => u.UserId, (u, ud) => new FullUser{
-                Id = u.Id,
-                UserName = u.UserName,
-                Email = u.Email,
-                RoleId = u.RoleId,
-                FirstName = ud.FirstName,
-                LastName = ud.LastName,
-                City = ud.City,
-                ZipCode = ud.ZipCode,
-                PhoneNumber = ud.PhoneNumber,
-                Street = ud.Street
-            });
+            var usersList = this.Users.Join(this.UsersDetails, u => u.Id, u => u.UserId, (u, ud) => new FullUser(u, ud));
             return await usersList.ToListAsync();
         }
 
@@ -129,19 +106,7 @@ namespace BooshiDAL
             await this.Users.AddAsync(user);
             await this.UsersDetails.AddAsync(userDetails);
             await this.SaveChangesAsync();
-            var fullUser = new FullUser
-            {
-                Id = user.Id,
-                UserName = user.UserName,
-                Email = user.Email,
-                RoleId = user.RoleId,
-                FirstName = userDetails.FirstName,
-                LastName = userDetails.LastName,
-                PhoneNumber = userDetails.PhoneNumber,
-                City = userDetails.City,
-                Street = userDetails.Street,
-                ZipCode = userDetails.ZipCode
-            };
+            var fullUser = new FullUser(user, userDetails);
             return fullUser;
         }
 

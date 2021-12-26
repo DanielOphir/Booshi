@@ -40,7 +40,7 @@ namespace BooshiWebApi
             
             services.AddControllers(options =>
             {
-                options.Filters.Add(new MyActionFilter());
+                options.Filters.Add(new ExceptionFilter());
             }).AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
