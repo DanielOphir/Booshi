@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ namespace BooshiDAL.Models
         public DeliveryStatus DeliveryStatus { get; set; }
         [JsonIgnore]
         public User User { get; set; }
+        [JsonIgnore]
+        public DeliveryPerson DeliveryPerson { get; set; }
         [JsonIgnore]
         public Origin Origin { get; set; }
         [JsonIgnore]
