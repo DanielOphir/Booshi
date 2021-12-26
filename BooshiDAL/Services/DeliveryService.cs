@@ -17,9 +17,9 @@ namespace BooshiDAL
         private IQueryable<FullDelivery> GetAllDeliveriesQuery()
         {
             var deliveriesList = (from deliveries in this.Deliveries
-                                 join origins in this.Origins on deliveries.Id equals origins.DeliveryId
-                                 join destinations in this.Destinations on deliveries.Id equals destinations.DeliveryId
-                                 select new FullDelivery() { Delivery = deliveries, Origin = origins, Destination = destinations });
+                                  join origins in this.Origins on deliveries.Id equals origins.DeliveryId
+                                  join destinations in this.Destinations on deliveries.Id equals destinations.DeliveryId
+                                  select new FullDelivery() { Delivery = deliveries, Origin = origins, Destination = destinations });
             return deliveriesList;
         }
 
@@ -68,7 +68,7 @@ namespace BooshiDAL
             await this.Origins.AddAsync(origin);
             await this.Destinations.AddAsync(destination);
             await this.SaveChangesAsync();
-            return new FullDelivery { Delivery = delivery, Origin = origin, Destination = destination};
+            return new FullDelivery { Delivery = delivery, Origin = origin, Destination = destination };
         }
         /// <summary>
         /// Delete the delivery that matched the id from the deliveries table.
@@ -89,11 +89,34 @@ namespace BooshiDAL
                 return false;
             }
         }
-
+        /// <summary>
+        /// Get all deliveries of cetrain user
+        /// </summary>
+        /// <param name="id">User id</param>
+        /// <returns>List of deliveries of the user</returns>
         public async Task<List<FullDelivery>> GetUserDeliveries(Guid id)
         {
             var deliveries = GetAllDeliveriesQuery().Where(X => X.Delivery.UserId == id);
             return await deliveries.ToListAsync();
         }
+
+        /// <summary>
+        /// Get all deliveries of cetrain delivery person
+        /// </summary>
+        /// <param name="id">Delivery person id</param>
+        /// <returns>Return all deliveries of cetrain delivery person, if not found return null</returns>
+        public async Task<List<FullDelivery>> GetDeliveriesByDeliveryPerson(Guid id)
+        {
+            if (await this.DeliveryPeople.FirstOrDefaultAsync(x => x.UserId == id) == null)
+                return null;
+            return await this.GetAllDeliveriesQuery().Where(delivery => delivery.Delivery.DeliveryPersonId == id).ToListAsync();
+        }
+
+        public async Task<List<FullDelivery>> GetDeliveriesByStatusId(int statusId) {
+            if (await this.DeliveryStatuses.FirstOrDefaultAsync(x => x.Id == statusId) == null)
+                return null;
+            return await this.GetAllDeliveriesQuery().Where(x => x.Delivery.DeliveryStatusId == statusId).ToListAsync();
+        }
+        
     }
 }

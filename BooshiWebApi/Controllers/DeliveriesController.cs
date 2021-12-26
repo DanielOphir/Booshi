@@ -46,6 +46,21 @@ namespace BooshiWebApi.Controllers
                 return NoContent();
             return Ok(deliveries);
         }
+        [Authorize(Roles = "Admin")]
+        [HttpGet("/deliveryperson/{id}")]
+        public async Task<IActionResult> GetDeliveriesByDeliveryPersonAsync(Guid id)
+        {
+            var deliveries = await _context.GetDeliveriesByDeliveryPerson(id);
+            if(deliveries == null)
+            {
+                return BadRequest(new { message = "No delivery person found" });
+            }
+            if (deliveries.Count < 1)
+            {
+                return NoContent();
+            }
+            return Ok(deliveries);
+        }
 
         [HttpGet("user")]
         public async Task<IActionResult> GetUserDeliveriesAsync()
