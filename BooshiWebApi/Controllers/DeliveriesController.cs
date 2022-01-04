@@ -65,7 +65,7 @@ namespace BooshiWebApi.Controllers
         [HttpGet("user")]
         public async Task<IActionResult> GetUserDeliveriesAsync()
         {
-            string jwtToken = Request.Cookies["jwt"];
+            string jwtToken = Request.Headers["jwt"];
             Guid userId = _jwtService.GetUserByTokenAsync(jwtToken);
             var deliveries = await _context.GetUserDeliveries(userId);
             if (deliveries.Count < 1)

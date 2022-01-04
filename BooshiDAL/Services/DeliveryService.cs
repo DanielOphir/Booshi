@@ -40,6 +40,7 @@ namespace BooshiDAL
             {
                 UserId = fullDelivery.Delivery.UserId,
                 DeliveryStatusId = 1,
+                DeliveryPersonId = null
             };
 
             await this.Deliveries.AddAsync(delivery);
@@ -63,7 +64,11 @@ namespace BooshiDAL
                 DeliveryId = delivery.Id,
                 City = fullDelivery.Destination.City,
                 Street = fullDelivery.Destination.Street,
-                ZipCode = fullDelivery.Destination.ZipCode
+                ZipCode = fullDelivery.Destination.ZipCode,
+                ReciverFirstName = fullDelivery.Destination.ReciverFirstName,
+                ReciverLastName = fullDelivery.Destination.ReciverLastName,
+                RevicerEmail = fullDelivery.Destination.RevicerEmail,
+                RevicerPhoneNumber = fullDelivery.Destination.RevicerPhoneNumber
             };
             await this.Origins.AddAsync(origin);
             await this.Destinations.AddAsync(destination);

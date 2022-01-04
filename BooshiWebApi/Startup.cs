@@ -78,7 +78,7 @@ namespace BooshiWebApi
                 {
                     OnMessageReceived = context =>
                     {
-                        context.Token = context.Request.Cookies["jwt"];
+                        context.Token = context.Request.Headers["jwt"];
                         return Task.CompletedTask;
                     },
                 };

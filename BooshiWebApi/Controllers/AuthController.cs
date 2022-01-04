@@ -74,17 +74,13 @@ namespace BooshiWebApi.Controllers
             var user = await _context.GetUserByUsernameAsync(loginModel.UserName);
             if (user == null)
             {
-                return BadRequest("Either your username or password is incorrect");
+                return BadRequest(new {message= "Either your username or password is incorrect" });
             }
             if (!BCrypt.Net.BCrypt.Verify(loginModel.Password, user.Password))
             {
-                return BadRequest("Either your username or password is incorrect");
+                return BadRequest(new { message = "Either your username or password is incorrect" });
             }
             var token = _jwtService.Generate(user.Id);
-            Response.Cookies.Append("jwt", token, new CookieOptions
-            {
-                HttpOnly = true
-            });
             return Ok(new {token});
         }
 
@@ -92,7 +88,7 @@ namespace BooshiWebApi.Controllers
          public async Task<IActionResult> GetUser()
         {
             User user;
-            var jwtToken = Request.Cookies["jwt"];
+            var jwtToken = Request.Headers["jwt"];
             var userId = _jwtService.GetUserByTokenAsync(jwtToken);
             user = await _context.GetUserByIdAsync(userId);
             return Ok(user);

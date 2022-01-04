@@ -15,7 +15,7 @@ namespace BooshiDAL.Models
         public int Id { get; set; }
         [Required]
         public Guid UserId { get; set; }
-        public Guid DeliveryPersonId { get; set; }
+        public Guid? DeliveryPersonId { get; set; }
         public DateTime Created { get; set; }
         public int DeliveryStatusId { get; set; }
         [JsonIgnore]
