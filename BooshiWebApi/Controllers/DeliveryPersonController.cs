@@ -1,4 +1,5 @@
 ﻿using BooshiDAL;
+using BooshiWebApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,16 +9,17 @@ using System.Threading.Tasks;
 
 namespace BooshiWebApi.Controllers
 {
-    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class DeliveryPersonController : Controller
     {
         private readonly BooshiDBContext _context;
+        private readonly JwtService _jwtService;
 
-        public DeliveryPersonController(BooshiDBContext context)
+        public DeliveryPersonController(BooshiDBContext context, JwtService jwtService)
         {
             this._context = context;
+            this._jwtService = jwtService;
         }
         [HttpPost]
         public async Task<IActionResult> AddDeliveryPersonAsync(Guid id)
@@ -61,5 +63,17 @@ namespace BooshiWebApi.Controllers
             }
             return Ok(deliveryPeople);
         }
+
+
+        [HttpPatch("asign-self")]
+        public async Task<IActionResult> AsignSelfDeliveryPerson([FromBody]int deliveryId)
+        {
+            var delivery = await _context.GetDeliveryByIdAsync(deliveryId);
+            if (delivery != null && delivery.DeliveryPersonId != null)
+                return BadRequest(new { message = "This delivery is already asigned to other delivery person." });
+            Guid deliveryPersonId = _jwtService.GetUserByTokenAsync(Request);
+            await _context.AsignDeliveryPerson(deliveryId, deliveryPersonId);
+            return Ok(delivery);
+        }
     }
-}
+}   

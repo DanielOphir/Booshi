@@ -16,9 +16,9 @@ namespace BooshiWebApi.Filters
             var httpContext = context.HttpContext;
             if (context.Exception is SecurityTokenExpiredException)
             {
-                httpContext.Response.StatusCode = 203;
+                httpContext.Response.StatusCode = 400;
                 httpContext.Response.Cookies.Delete("jwt");
-                httpContext.Response.WriteAsJsonAsync(new {Message = "Token expired"});
+                httpContext.Response.WriteAsJsonAsync(new {Type="expiredToken",Message = "Token expired"});
                 context.ExceptionHandled = true;
                 return;
             }

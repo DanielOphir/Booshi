@@ -16,7 +16,7 @@
 
         public RegisterModel()
         {
-            RoleId = 2;
+            RoleId = 3;
         }
     }
 }

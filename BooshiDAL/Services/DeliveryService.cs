@@ -29,6 +29,28 @@ namespace BooshiDAL
             return await deliveries.ToListAsync();
         }
 
+        public async Task<Delivery> AsignDeliveryPerson(int deliveryId, Guid deliveryPersonId)
+        {
+            var deliveryPerson = await this.Users.Where(user=> user.RoleId == 2).FirstOrDefaultAsync(dp => dp.Id == deliveryPersonId);
+            if (deliveryPerson == null)
+            {
+                throw new Exception("Delivery person doesn't exists");
+            }
+            var delivery = await this.GetDeliveryByIdAsync(deliveryId);
+            if (delivery == null)
+            {
+                throw new Exception("Delivery doesn't exists");
+            }
+            delivery.DeliveryPersonId = deliveryPersonId;
+            await this.SaveChangesAsync();
+            return delivery;
+        }
+
+        public async Task<Delivery> GetDeliveryByIdAsync(int deliveryId)
+        {
+            return await this.Deliveries.FirstOrDefaultAsync(delivery => delivery.Id == deliveryId);
+        }
+
         /// <summary>
         /// Add delivery to the deliveries table
         /// </summary>
@@ -39,6 +61,7 @@ namespace BooshiDAL
             var delivery = new Delivery
             {
                 UserId = fullDelivery.Delivery.UserId,
+                Notes = fullDelivery.Delivery.Notes,
                 DeliveryStatusId = 1,
                 DeliveryPersonId = null
             };
@@ -65,10 +88,10 @@ namespace BooshiDAL
                 City = fullDelivery.Destination.City,
                 Street = fullDelivery.Destination.Street,
                 ZipCode = fullDelivery.Destination.ZipCode,
-                ReciverFirstName = fullDelivery.Destination.ReciverFirstName,
-                ReciverLastName = fullDelivery.Destination.ReciverLastName,
-                RevicerEmail = fullDelivery.Destination.RevicerEmail,
-                RevicerPhoneNumber = fullDelivery.Destination.RevicerPhoneNumber
+                FirstName = fullDelivery.Destination.FirstName,
+                LastName = fullDelivery.Destination.LastName,
+                Email = fullDelivery.Destination.Email,
+                PhoneNumber = fullDelivery.Destination.PhoneNumber
             };
             await this.Origins.AddAsync(origin);
             await this.Destinations.AddAsync(destination);
@@ -103,6 +126,52 @@ namespace BooshiDAL
         {
             var deliveries = GetAllDeliveriesQuery().Where(X => X.Delivery.UserId == id);
             return await deliveries.ToListAsync();
+        }
+
+        /// <summary>
+        /// Get deliveries of certain user by page number
+        /// </summary>
+        /// <param name="id">User id</param>
+        /// <param name="pageNumber">Number of page in paginator</param>
+        /// <returns>List of deliveries</returns>
+        public async Task<List<FullDelivery>> GetUserDeliveriesByPagesAsync(Guid id, int pageNumber)
+        {
+            var deliveries = GetAllDeliveriesQuery().Where(X => X.Delivery.UserId == id).OrderByDescending(x => x.Delivery.Created).Skip(pageNumber * 10 - 10).Take(10);
+            return await deliveries.ToListAsync();
+        }
+
+        public async Task<bool> ChangeDeliveryStatus(int deliveryId, int statusId)
+        {
+            var delivery = await this.Deliveries.FirstOrDefaultAsync(delivery => delivery.Id == deliveryId);
+            if (delivery == null)
+            {
+                return false;
+                throw new ArgumentException($"Delivery #{deliveryId} doesn't exist");
+            }
+            var status = await this.DeliveryStatuses.FirstOrDefaultAsync(status => status.Id == statusId);
+            if (status == null)
+            {
+                return false;
+                throw new ArgumentException($"Status number {statusId} doesn't exist");
+            }
+            delivery.DeliveryStatusId = statusId;
+            await this.SaveChangesAsync();
+            return true;
+        }
+
+        public int GetUserDeliveriesCount(Guid id)
+        {
+            return GetAllDeliveriesQuery().Where(X => X.Delivery.UserId == id).Count();
+        }
+
+        public async Task<int> GetDeliveryStatusAsync(int deliveryId)
+        {
+            var delivery = await this.Deliveries.FirstOrDefaultAsync(delivery => delivery.Id == deliveryId);
+            if (delivery == null)
+            {
+                throw new ArgumentException($"Delivery #{deliveryId} doesn't exist");
+            }
+            return delivery.DeliveryStatusId;
         }
 
         /// <summary>

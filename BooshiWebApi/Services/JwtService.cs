@@ -1,5 +1,6 @@
 ﻿using BooshiDAL;
 using BooshiDAL.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -52,7 +53,14 @@ namespace BooshiWebApi.Services
 
             return (JwtSecurityToken) validatedToken;
         }
-
+        public Guid GetUserByTokenAsync(HttpRequest request)
+        {
+            var jwtToken = request.Headers["Authorization"].ToString().Substring(7);
+            JwtSecurityToken token;
+            token = this.Verify(jwtToken);
+            Guid userId = Guid.Parse(token.Issuer);
+            return userId;
+        }
         public Guid GetUserByTokenAsync(string jwtToken)
         {
             JwtSecurityToken token;

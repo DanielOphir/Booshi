@@ -72,15 +72,6 @@ namespace BooshiWebApi
                     ValidateAudience = false,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
-                   
-                };
-                jwtBearerOptions.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        context.Token = context.Request.Headers["jwt"];
-                        return Task.CompletedTask;
-                    },
                 };
             });
 
@@ -102,12 +93,11 @@ namespace BooshiWebApi
             app.UseRouting();
 
             app.UseCors(options =>
-            {
-                options.WithOrigins(new[] {"http://localhost:3000"})
+                options
                 .AllowAnyHeader()
                 .AllowAnyMethod()
-                .AllowCredentials();
-            });
+                .WithOrigins("http://localhost:3000")
+            );
 
             app.UseAuthentication();
             app.UseAuthorization();

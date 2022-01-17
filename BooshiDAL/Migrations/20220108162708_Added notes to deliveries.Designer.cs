@@ -4,14 +4,16 @@ using BooshiDAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BooshiDAL.Migrations
 {
     [DbContext(typeof(BooshiDBContext))]
-    partial class BooshiDBContextModelSnapshot : ModelSnapshot
+    [Migration("20220108162708_Added notes to deliveries")]
+    partial class Addednotestodeliveries
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,16 +94,16 @@ namespace BooshiDAL.Migrations
                     b.Property<string>("City")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("ReciverFirstName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FirstName")
+                    b.Property<string>("ReciverLastName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LastName")
+                    b.Property<string>("RevicerEmail")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhoneNumber")
+                    b.Property<string>("RevicerPhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Street")

@@ -22,8 +22,6 @@ namespace BooshiWebApi.Controllers
         private readonly JwtService _jwtService;
         private readonly MailService _mailService;
 
-        public object GetClaims { get; private set; }
-
         public AuthController(BooshiDBContext context, JwtService jwtService,
             MailService mailService)
         {
@@ -36,7 +34,10 @@ namespace BooshiWebApi.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync(RegisterModel registerModel)
         {
-
+            if (await _context.isUsernameExistsAsync(registerModel.UserName))
+                return BadRequest(new {type="username", message="This username is already exists."});
+            if (await _context.isEmailExistsAsync(registerModel.Email))
+                return BadRequest(new { type = "email", message = "A user with this email is already exists." });
             var newUser = new User
             {
                 Id = new Guid(),
@@ -59,7 +60,7 @@ namespace BooshiWebApi.Controllers
             try
             {
                 await _context.AddUserAsync(newUser, newUserDetails);
-                _mailService.SendMail(newUser.Email, "Registration complete", "Ty for signing up to our delivery service, we wish you a great.");
+                //_mailService.SendMail(newUser.Email, "Registration complete", "Ty for signing up to our delivery service, we wish you a great.");
                return Created("", newUser);
             }
             catch (Exception ex)
@@ -88,9 +89,19 @@ namespace BooshiWebApi.Controllers
          public async Task<IActionResult> GetUser()
         {
             User user;
-            var jwtToken = Request.Headers["jwt"];
+            var jwtToken = Request.Headers["Authorization"].ToString().Substring(7);
             var userId = _jwtService.GetUserByTokenAsync(jwtToken);
             user = await _context.GetUserByIdAsync(userId);
+            return Ok(user);
+        }
+
+        [HttpGet("fulluser")]
+        public async Task<IActionResult> GetFullUser()
+        {
+            FullUser user;
+            var jwtToken = Request.Headers["Authorization"].ToString().Substring(7);
+            var userId = _jwtService.GetUserByTokenAsync(jwtToken);
+            user = await _context.GetUserInfoById(userId);
             return Ok(user);
         }
 

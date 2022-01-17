@@ -37,11 +37,13 @@ namespace BooshiDAL
         /// </summary>
         /// <param name="id">User id</param>
         /// <returns>If found, returns the full user information, else returns null</returns>
-        public FullUser GetUserInfoById(Guid id)
+        public async Task<FullUser> GetUserInfoById(Guid id)
         {
-            var user = this.Users.Join(this.UsersDetails, u => u.Id, u => u.UserId, (u, ud) => new
-            FullUser(u, ud)).FirstOrDefault(u => u.Id == id);
-            return user;
+            var user = from users in this.Users
+                       where users.Id == id
+                       join userDetails in this.UsersDetails on users.Id equals userDetails.UserId
+                       select new FullUser(users, userDetails);
+            return await user.FirstOrDefaultAsync();
         }
 
         /// <summary>
@@ -115,6 +117,32 @@ namespace BooshiDAL
             var user = GetUserByIdAsync(id).Result;
             var role = this.GetRoleNameById(user.RoleId);
             return role;
+        }
+
+        /// <summary>
+        /// Checks if username is already exists
+        /// </summary>
+        /// <param name="username">username of user</param>
+        /// <returns>True if the username exists, else returns false</returns>
+        public async Task<bool> isUsernameExistsAsync(string username)
+        {
+            var user = await this.Users.FirstOrDefaultAsync(user => user.UserName == username);
+            if (user != null)
+                return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if email is already exists
+        /// </summary>
+        /// <param name="email">email of user</param>
+        /// <returns>True if the email exists, else returns false</returns>
+        public async Task<bool> isEmailExistsAsync(string email)
+        {
+            var user = await this.Users.FirstOrDefaultAsync(user => user.Email == email);
+            if (user != null)
+                return true;
+            return false;
         }
     }
 

@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -26,7 +27,7 @@ namespace BooshiWebApi.Controllers
             this._jwtService = jwtService;
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, DeliveryPerson")]
         [HttpGet]
         public async Task<IActionResult> GetAllDeliveriesAsync()
         {
@@ -34,7 +35,6 @@ namespace BooshiWebApi.Controllers
             if (deliveries.Count < 1)
                 return NoContent();
             return Ok(deliveries);
-
         }
 
         [Authorize(Roles= "Admin")]
@@ -65,12 +65,43 @@ namespace BooshiWebApi.Controllers
         [HttpGet("user")]
         public async Task<IActionResult> GetUserDeliveriesAsync()
         {
-            string jwtToken = Request.Headers["jwt"];
-            Guid userId = _jwtService.GetUserByTokenAsync(jwtToken);
+            Guid userId = _jwtService.GetUserByTokenAsync(Request);
             var deliveries = await _context.GetUserDeliveries(userId);
             if (deliveries.Count < 1)
                 return NoContent();
             return Ok(deliveries);
+        }
+
+        [HttpGet("user/page/{pageNumber}")]
+        public async Task<IActionResult> GetUserDeliveriesAsync(int pageNumber)
+        {
+            var jwtToken = Request.Headers["Authorization"].ToString().Substring(7);
+            Guid userId = _jwtService.GetUserByTokenAsync(jwtToken);
+            var deliveries = await _context.GetUserDeliveriesByPagesAsync(userId, pageNumber);
+            if (deliveries.Count < 1)
+                return NoContent();
+            var totalCount = _context.GetUserDeliveriesCount(userId);
+            return Ok(new { deliveries, totalDeliveries = totalCount });
+        }
+
+        [HttpPatch("cancel/{deliveryId}")]
+        public async Task<IActionResult> CancelDeliveryAsync(int deliveryId)
+        {
+            var deliveryStatus = await _context.GetDeliveryStatusAsync(deliveryId);
+            if (deliveryStatus != 1)
+            {
+                return BadRequest(new { message = "Can't cancel delivery that is not pending." });
+            }
+            await _context.ChangeDeliveryStatus(deliveryId, 4);
+            return Ok();
+        }
+
+        [Authorize(Roles = "Admin, DeliveryPerson")]
+        [HttpPatch("update-status")]
+        public async Task<IActionResult> UpdateDeliveryStatusAsync([FromForm] int deliveryId, [FromForm] int statusId)
+        {
+            await _context.ChangeDeliveryStatus(deliveryId, statusId);
+            return Ok();
         }
 
         [HttpPost]
@@ -88,8 +119,8 @@ namespace BooshiWebApi.Controllers
 
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete]
-
         public async Task<IActionResult> DeleteDeliveryAsync([FromBody]int id)
         {
             var success = await _context.DeleteDeliveryAsync(id);
