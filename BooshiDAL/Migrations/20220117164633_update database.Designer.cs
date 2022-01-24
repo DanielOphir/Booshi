@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BooshiDAL.Migrations
 {
     [DbContext(typeof(BooshiDBContext))]
-    [Migration("20211225142320_Added isActive to Users and DeliveryPeople")]
-    partial class AddedisActivetoUsersandDeliveryPeople
+    [Migration("20220117164633_update database")]
+    partial class updatedatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -35,11 +35,14 @@ namespace BooshiDAL.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("getdate()");
 
-                    b.Property<Guid>("DeliveryPersonId")
+                    b.Property<Guid?>("DeliveryPersonId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("DeliveryStatusId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -60,7 +63,7 @@ namespace BooshiDAL.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("IsActive")
+                    b.Property<bool>("IsActiveDeliveryPerson")
                         .HasColumnType("bit");
 
                     b.HasKey("UserId");
@@ -91,16 +94,16 @@ namespace BooshiDAL.Migrations
                     b.Property<string>("City")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ReciverFirstName")
+                    b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ReciverLastName")
+                    b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RevicerEmail")
+                    b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RevicerPhoneNumber")
+                    b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Street")
@@ -161,7 +164,7 @@ namespace BooshiDAL.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<bool>("IsActive")
+                    b.Property<bool>("IsActiveUser")
                         .HasColumnType("bit");
 
                     b.Property<string>("Password")
@@ -222,9 +225,7 @@ namespace BooshiDAL.Migrations
                 {
                     b.HasOne("BooshiDAL.Models.DeliveryPerson", "DeliveryPerson")
                         .WithMany("Deliveries")
-                        .HasForeignKey("DeliveryPersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DeliveryPersonId");
 
                     b.HasOne("BooshiDAL.Models.DeliveryStatus", "DeliveryStatus")
                         .WithMany("Deliveries")

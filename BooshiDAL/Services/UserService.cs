@@ -51,12 +51,12 @@ namespace BooshiDAL
         /// </summary>
         /// <param name="user">Full user model</param>
         /// <returns>returns the user and a error/success message</returns>
-        public async Task<(FullUser user, string text)> UpdateUserAsync(FullUser user)
+        public async Task<FullUser> UpdateUserAsync(FullUser user)
         {
             var foundUserDetails = await this.UsersDetails.FirstOrDefaultAsync(u => u.UserId == user.Id);
             var foundUser = await this.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
             if (foundUserDetails == null || foundUser == null)
-                return (null, "No user found");
+                return null;         
             foundUserDetails.Street = user.Street;
             foundUserDetails.City = user.City;
             foundUserDetails.LastName = user.LastName;
@@ -64,16 +64,9 @@ namespace BooshiDAL
             foundUserDetails.FirstName = user.FirstName;
             foundUserDetails.PhoneNumber = user.PhoneNumber;
             foundUser.Email = user.Email;
-            foundUser.RoleId = user.RoleId;
-            try
-            {
-                await this.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                return (null, ex.InnerException.Message);
-            }
-            return (user, "Success");
+            foundUser.UserName = user.UserName;
+            await this.SaveChangesAsync();
+            return user;
         }
 
         /// <summary>
@@ -97,11 +90,28 @@ namespace BooshiDAL
         /// Method that gets all full users information.
         /// </summary>
         /// <returns>List of all full users information</returns>
-        public async Task<List<FullUser>> GetAllUsersAsync()
+        public IQueryable<FullUser> GetAllUsersQuery()
         {
             var usersList = this.Users.Join(this.UsersDetails, u => u.Id, u => u.UserId, (u, ud) => new FullUser(u, ud));
+            return usersList;
+        }
+
+        public int GetUsersCount()
+        {
+            return GetAllUsersQuery().Count();
+        }
+
+        /// <summary>
+        /// Method that gets 10 users by page number.
+        /// </summary>
+        /// <returns>List of 10 users by page number provided</returns>
+        public async Task<List<FullUser>> GetUsersByPageAsync(int pageNum)
+        {
+            var usersList = this.Users.Join(this.UsersDetails, u => u.Id, u => u.UserId, (u, ud) => new FullUser(u, ud)).Skip(pageNum * 10 - 10).Take(10);
             return await usersList.ToListAsync();
         }
+
+
 
         public async Task<FullUser> AddUserAsync(User user, UserDetails userDetails)
         {
@@ -118,6 +128,20 @@ namespace BooshiDAL
             var role = this.GetRoleNameById(user.RoleId);
             return role;
         }
+
+        /// <summary>
+        /// Checks if user is exists
+        /// </summary>
+        /// <param name="username">username of user</param>
+        /// <returns>True if the user exists, else returns false</returns>
+        public async Task<bool> isUserExistsAsync(Guid id)
+        {
+            var user = await this.Users.FirstOrDefaultAsync(user => user.Id == id);
+            if (user != null)
+                return true;
+            return false;
+        }
+
 
         /// <summary>
         /// Checks if username is already exists

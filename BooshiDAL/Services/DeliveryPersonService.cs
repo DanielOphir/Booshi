@@ -68,5 +68,11 @@ namespace BooshiDAL
                                         select new FullUser(_user, _userDetails)).ToListAsync();
             return deliveryPeople;
         }
+
+        public async Task<List<FullDelivery>> GetDeliveriesByDeliveryPerson (Guid id, int pageNumber)
+        {
+            var deliveries = GetAllDeliveriesQuery().Where(X => X.Delivery.DeliveryPersonId == id).OrderByDescending(x => x.Delivery.Created).Skip(pageNumber * 10 - 10).Take(10);
+            return await deliveries.ToListAsync();
+        }
     }
 }

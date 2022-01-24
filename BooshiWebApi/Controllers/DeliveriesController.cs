@@ -37,21 +37,24 @@ namespace BooshiWebApi.Controllers
             return Ok(deliveries);
         }
 
-        [Authorize(Roles= "Admin")]
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserDeliveriesByIdAsync(Guid id)
+        [Authorize(Roles = "Admin")]
+        [HttpGet("{id}/page/{pageNum}")]
+        public async Task<IActionResult> GetUserDeliveriesByIdAsync(Guid id, int pageNum)
         {
-            var deliveries = await _context.GetUserDeliveries(id);
+            if (await _context.isUserExistsAsync(id) == false)
+                return NotFound("No user found");
+            var deliveries = await _context.GetUserDeliveriesByPageNum(id, pageNum);
+            var totalCount = _context.GetDeliveryCountByUserId(id);
             if (deliveries.Count < 1)
                 return NoContent();
-            return Ok(deliveries);
+            return Ok(new { deliveries, totalCount});
         }
         [Authorize(Roles = "Admin")]
         [HttpGet("/deliveryperson/{id}")]
         public async Task<IActionResult> GetDeliveriesByDeliveryPersonAsync(Guid id)
         {
             var deliveries = await _context.GetDeliveriesByDeliveryPerson(id);
-            if(deliveries == null)
+            if (deliveries == null)
             {
                 return BadRequest(new { message = "No delivery person found" });
             }
@@ -62,25 +65,24 @@ namespace BooshiWebApi.Controllers
             return Ok(deliveries);
         }
 
-        [HttpGet("user")]
-        public async Task<IActionResult> GetUserDeliveriesAsync()
-        {
-            Guid userId = _jwtService.GetUserByTokenAsync(Request);
-            var deliveries = await _context.GetUserDeliveries(userId);
-            if (deliveries.Count < 1)
-                return NoContent();
-            return Ok(deliveries);
-        }
-
         [HttpGet("user/page/{pageNumber}")]
         public async Task<IActionResult> GetUserDeliveriesAsync(int pageNumber)
         {
-            var jwtToken = Request.Headers["Authorization"].ToString().Substring(7);
-            Guid userId = _jwtService.GetUserByTokenAsync(jwtToken);
+            Guid userId = _jwtService.GetUserByTokenAsync(Request);
             var deliveries = await _context.GetUserDeliveriesByPagesAsync(userId, pageNumber);
             if (deliveries.Count < 1)
                 return NoContent();
             var totalCount = _context.GetUserDeliveriesCount(userId);
+            return Ok(new { deliveries, totalDeliveries = totalCount });
+        }
+
+        [HttpGet("new-deliveries/page/{pageNumber}")]
+        public async Task<IActionResult> GetNewDeliveriesAsync(int pageNumber)
+        {
+            var deliveries = await _context.GetNewDeliveriesByPagesAsync(pageNumber);
+            if (deliveries.Count < 1)
+                return NoContent();
+            var totalCount = _context.GetNewDeliveriesCount();
             return Ok(new { deliveries, totalDeliveries = totalCount });
         }
 
@@ -93,6 +95,20 @@ namespace BooshiWebApi.Controllers
                 return BadRequest(new { message = "Can't cancel delivery that is not pending." });
             }
             await _context.ChangeDeliveryStatus(deliveryId, 4);
+            return Ok();
+        }
+
+        [Authorize(Roles = "Admin, DeliveryPerson")]
+        [HttpPatch("change-status/{deliveryId}")]
+        public async Task<IActionResult> ChangeDeliveryStatusAsync(int deliveryId, [FromBody] int statusId)
+        {
+            var delivery = await _context.GetDeliveryByIdAsync(deliveryId);
+            if (delivery == null)
+            {
+                return BadRequest(new { message = "Delivery could not be found." });
+            }
+            delivery.DeliveryStatusId = statusId;
+            await _context.SaveChangesAsync();
             return Ok();
         }
 

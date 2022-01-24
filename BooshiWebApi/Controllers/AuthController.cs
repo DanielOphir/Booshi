@@ -45,6 +45,7 @@ namespace BooshiWebApi.Controllers
                 Password = BCrypt.Net.BCrypt.HashPassword(registerModel.Password),
                 Email = registerModel.Email,
                 RoleId = registerModel.RoleId,
+                IsActiveUser = true
             };
             var newUserDetails = new UserDetails
             {
@@ -65,7 +66,7 @@ namespace BooshiWebApi.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new {message = "Exception : " + ex.Message});
+                return BadRequest(new {message = "Exception : " + ex.InnerException.Message});
             }
         }
 

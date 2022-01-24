@@ -45,7 +45,7 @@ namespace BooshiDAL
             await this.SaveChangesAsync();
             return delivery;
         }
-
+        
         public async Task<Delivery> GetDeliveryByIdAsync(int deliveryId)
         {
             return await this.Deliveries.FirstOrDefaultAsync(delivery => delivery.Id == deliveryId);
@@ -117,15 +117,21 @@ namespace BooshiDAL
                 return false;
             }
         }
+
         /// <summary>
         /// Get all deliveries of cetrain user
         /// </summary>
         /// <param name="id">User id</param>
         /// <returns>List of deliveries of the user</returns>
-        public async Task<List<FullDelivery>> GetUserDeliveries(Guid id)
+        public async Task<List<FullDelivery>> GetUserDeliveriesByPageNum(Guid id, int pageNum)
         {
-            var deliveries = GetAllDeliveriesQuery().Where(X => X.Delivery.UserId == id);
+            var deliveries = GetAllDeliveriesQuery().Where(X => X.Delivery.UserId == id).Skip(pageNum * 10 - 10).Take(10);
             return await deliveries.ToListAsync();
+        }
+
+        public int GetDeliveryCountByUserId(Guid id)
+        {
+            return GetAllDeliveriesQuery().Where(X => X.Delivery.UserId == id).Count();
         }
 
         /// <summary>
@@ -137,6 +143,12 @@ namespace BooshiDAL
         public async Task<List<FullDelivery>> GetUserDeliveriesByPagesAsync(Guid id, int pageNumber)
         {
             var deliveries = GetAllDeliveriesQuery().Where(X => X.Delivery.UserId == id).OrderByDescending(x => x.Delivery.Created).Skip(pageNumber * 10 - 10).Take(10);
+            return await deliveries.ToListAsync();
+        }
+
+        public async Task<List<FullDelivery>> GetNewDeliveriesByPagesAsync(int pageNumber)
+        {
+            var deliveries = GetAllDeliveriesQuery().Where(delivery => delivery.Delivery.DeliveryStatusId == 1 && delivery.Delivery.DeliveryPersonId == null).OrderBy(x => x.Delivery.Created).Skip(pageNumber * 10 - 10).Take(10);
             return await deliveries.ToListAsync();
         }
 
@@ -161,7 +173,17 @@ namespace BooshiDAL
 
         public int GetUserDeliveriesCount(Guid id)
         {
-            return GetAllDeliveriesQuery().Where(X => X.Delivery.UserId == id).Count();
+            return GetAllDeliveriesQuery().Where(delivery => delivery.Delivery.UserId == id).Count();
+        }
+
+        public int GetNewDeliveriesCount()
+        {
+            return GetAllDeliveriesQuery().Where(delivery => delivery.Delivery.DeliveryStatusId == 1 && delivery.Delivery.DeliveryPersonId == null).Count();
+        }
+
+        public int GetDeliveryPersonDeliveriesCount(Guid id)
+        {
+            return GetAllDeliveriesQuery().Where(delivery => delivery.Delivery.DeliveryPersonId == id).Count();
         }
 
         public async Task<int> GetDeliveryStatusAsync(int deliveryId)
