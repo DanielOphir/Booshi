@@ -1,4 +1,5 @@
 ﻿using BooshiDAL;
+using BooshiDAL.Interfaces;
 using BooshiWebApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,18 +14,20 @@ namespace BooshiWebApi.Controllers
     [ApiController]
     public class DeliveryPersonController : Controller
     {
-        private readonly BooshiDBContext _context;
-        private readonly JwtService _jwtService;
+        private readonly IJwtService _jwtService;
+        private readonly IDeliveryRepository _deliveryRepo;
+        private readonly IDeliveryPersonRepository _deliveryPersonRepo;
 
-        public DeliveryPersonController(BooshiDBContext context, JwtService jwtService)
+        public DeliveryPersonController(IJwtService jwtService, IDeliveryRepository deliveryRepo, IDeliveryPersonRepository deliveryPersonRepo)
         {
-            this._context = context;
             this._jwtService = jwtService;
+            this._deliveryRepo = deliveryRepo;
+            this._deliveryPersonRepo = deliveryPersonRepo;
         }
         [HttpPost]
         public async Task<IActionResult> AddDeliveryPersonAsync([FromBody]Guid id)
         {
-            var deliveryPerson = await _context.AddDeliveryPersonAsync(id);
+            var deliveryPerson = await _deliveryPersonRepo.AddDeliveryPersonAsync(id);
             if (deliveryPerson == null)
             {
                 return BadRequest("No user found");
@@ -34,7 +37,7 @@ namespace BooshiWebApi.Controllers
         [HttpDelete]
         public async Task<IActionResult> RemoveDeliveryPersonAsync(Guid id)
         {
-            var success = await _context.RemoveDeliveryPersonAsync(id);
+            var success = await _deliveryPersonRepo.RemoveDeliveryPersonAsync(id);
             if (!success)
             {
                 return BadRequest("Something went wrong");
@@ -45,8 +48,8 @@ namespace BooshiWebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllDeliveryPeopleAsync()
         {
-            var deliveryPeople = await _context.GetAllDeliveryPeopleAsync().ToListAsync();
-            if (deliveryPeople.Count < 1)
+            var deliveryPeople = await _deliveryPersonRepo.GetAllDeliveryPeopleAsync().ToListAsync();
+            if (deliveryPeople.Count() < 1)
             {
                 return NoContent();
             }
@@ -56,8 +59,8 @@ namespace BooshiWebApi.Controllers
         [HttpGet("{isActive}")]
         public async Task<IActionResult> GetDeliveryPeopleByActivityAsync(bool isActive)
         {
-            var deliveryPeople = await _context.GetDeliveryPeopleByActivityAsync(isActive);
-            if (deliveryPeople.Count < 1)
+            var deliveryPeople = await _deliveryPersonRepo.GetDeliveryPeopleByActivityAsync(isActive);
+            if (deliveryPeople.Count() < 1)
             {
                 return NoContent();
             }
@@ -69,12 +72,12 @@ namespace BooshiWebApi.Controllers
         public async Task<IActionResult> GetDeliveriesByDeliveryPerson(int pageNum)
         {
             var deliveryPersonId = _jwtService.GetUserByTokenAsync(Request);
-            var deliveries = await _context.GetDeliveriesByDeliveryPerson(deliveryPersonId, pageNum);
-            if (deliveries.Count < 1)
+            var deliveries = await _deliveryRepo.GetDeliveriesByDeliveryPerson(deliveryPersonId, pageNum);
+            if (deliveries.Count() < 1)
             {
                 return NoContent();
             }
-            var totalDeliveries = _context.GetDeliveryPersonDeliveriesCount(deliveryPersonId);
+            var totalDeliveries = _deliveryRepo.GetDeliveryPersonDeliveriesCount(deliveryPersonId);
             return Ok(new { deliveries, totalDeliveries });
         }
 
@@ -82,13 +85,13 @@ namespace BooshiWebApi.Controllers
         [HttpPatch("asign-self")]
         public async Task<IActionResult> AsignSelfDeliveryPerson([FromBody]int deliveryId)
         {
-            var delivery = await _context.GetDeliveryByIdAsync(deliveryId);
-            if (delivery != null && delivery.DeliveryPersonId != null)
+            var delivery = await _deliveryRepo.GetDeliveryByIdAsync(deliveryId);
+            if (delivery != null && delivery.Delivery.DeliveryPersonId != null)
                 return BadRequest(new { message = "This delivery is already asigned to other delivery person." });
-            if (delivery.DeliveryStatusId == 4)
+            if (delivery.Delivery.DeliveryStatusId == 4)
                 return BadRequest(new { message = "This delivery is cancelled." });
             Guid deliveryPersonId = _jwtService.GetUserByTokenAsync(Request);
-            await _context.AsignDeliveryPerson(deliveryId, deliveryPersonId);
+            await _deliveryRepo.AsignDeliveryPerson(deliveryId, deliveryPersonId);
             return Ok(delivery);
         }
     }

@@ -1,4 +1,5 @@
 ﻿using BooshiDAL;
+using BooshiDAL.Interfaces;
 using BooshiDAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
@@ -11,25 +12,25 @@ using System.Threading.Tasks;
 
 namespace BooshiWebApi.Services
 {
-    public class JwtService
+    public class JwtService : IJwtService
     {
 
         private string secureKey = "Booshi is the best delivery system";
-        private readonly BooshiDBContext _context;
+        private readonly IUserRepository _userRepo;
 
-        public JwtService(BooshiDBContext context)
+        public JwtService(IUserRepository userRepo)
         {
-            this._context = context;
+            this._userRepo = userRepo;
         }
-        public string Generate(Guid id)
+        public async Task<string> Generate(Guid id)
         {
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secureKey));
             var credentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256Signature);
-            var user = _context.GetUserByIdAsync(id).Result;
+            var user = _userRepo.GetUserByIdAsync(id).Result;
             var header = new JwtHeader(credentials);
             var claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.Role, _context.GetRoleNameByUserId(id))
+                new Claim(ClaimTypes.Role, await _userRepo.GetRoleNameByUserIdAsync(id))
             };
 
             var payload = new JwtPayload(issuer:id.ToString(), null, claims, null, DateTime.UtcNow.AddDays(1));

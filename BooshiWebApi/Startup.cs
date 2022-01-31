@@ -21,17 +21,18 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Net.Http;
 using BooshiWebApi.Filters;
+using BooshiDAL.Interfaces;
+using BooshiDAL.Repositories;
 
 namespace BooshiWebApi
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -51,8 +52,11 @@ namespace BooshiWebApi
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BooshiWebApi", Version = "v1" });
             });
             services.AddCors();
-            services.AddScoped<JwtService>();
+            services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<MailService>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IDeliveryRepository, DeliveryRepository>();
+            services.AddScoped<IDeliveryPersonRepository, DeliveryPersonRepository>();
 
             services.AddDbContext<BooshiDBContext>(options =>
             {

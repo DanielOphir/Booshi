@@ -1,4 +1,5 @@
 ﻿using BooshiDAL;
+using BooshiDAL.Interfaces;
 using BooshiDAL.Models;
 using BooshiWebApi.Models;
 using BooshiWebApi.Services;
@@ -19,24 +20,26 @@ namespace BooshiWebApi.Controllers
     public class AuthController : Controller
     {
         private readonly BooshiDBContext _context;
-        private readonly JwtService _jwtService;
+        private readonly IJwtService _jwtService;
         private readonly MailService _mailService;
+        private readonly IUserRepository _userRepo;
 
-        public AuthController(BooshiDBContext context, JwtService jwtService,
-            MailService mailService)
+        public AuthController(BooshiDBContext context, IJwtService jwtService,
+            MailService mailService, IUserRepository userRepo)
         {
             this._context = context;
             this._jwtService = jwtService;
             this._mailService = mailService;
+            this._userRepo = userRepo;
         }
 
 
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync(RegisterModel registerModel)
         {
-            if (await _context.isUsernameExistsAsync(registerModel.UserName))
+            if (await _userRepo.isUsernameExistsAsync(registerModel.UserName))
                 return BadRequest(new {type="username", message="This username is already exists."});
-            if (await _context.isEmailExistsAsync(registerModel.Email))
+            if (await _userRepo.isEmailExistsAsync(registerModel.Email))
                 return BadRequest(new { type = "email", message = "A user with this email is already exists." });
             var newUser = new User
             {
@@ -60,8 +63,8 @@ namespace BooshiWebApi.Controllers
             };
             try
             {
-                await _context.AddUserAsync(newUser, newUserDetails);
-                //_mailService.SendMail(newUser.Email, "Registration complete", "Ty for signing up to our delivery service, we wish you a great.");
+                await _userRepo.AddUserAsync(newUser, newUserDetails);
+               _mailService.SendMail(newUser.Email, "Registration complete", "Thank you for signing up to our delivery service, we are excited to work along with you.");
                return Created("", newUser);
             }
             catch (Exception ex)
@@ -73,7 +76,7 @@ namespace BooshiWebApi.Controllers
         [HttpPost("login")]
         public async Task<ActionResult> LoginAsync(LoginModel loginModel)
         {
-            var user = await _context.GetUserByUsernameAsync(loginModel.UserName);
+            var user = await _userRepo.GetUserByUsernameAsync(loginModel.UserName);
             if (user == null)
             {
                 return BadRequest(new {message= "Either your username or password is incorrect" });
@@ -82,7 +85,7 @@ namespace BooshiWebApi.Controllers
             {
                 return BadRequest(new { message = "Either your username or password is incorrect" });
             }
-            var token = _jwtService.Generate(user.Id);
+            var token = await _jwtService.Generate(user.Id);
             return Ok(new {token});
         }
 
@@ -92,7 +95,7 @@ namespace BooshiWebApi.Controllers
             User user;
             var jwtToken = Request.Headers["Authorization"].ToString().Substring(7);
             var userId = _jwtService.GetUserByTokenAsync(jwtToken);
-            user = await _context.GetUserByIdAsync(userId);
+            user = await _userRepo.GetUserByIdAsync(userId);
             return Ok(user);
         }
 
@@ -102,7 +105,7 @@ namespace BooshiWebApi.Controllers
             FullUser user;
             var jwtToken = Request.Headers["Authorization"].ToString().Substring(7);
             var userId = _jwtService.GetUserByTokenAsync(jwtToken);
-            user = await _context.GetUserInfoById(userId);
+            user = await _userRepo.GetUserInfoByIdAsync(userId);
             return Ok(user);
         }
 

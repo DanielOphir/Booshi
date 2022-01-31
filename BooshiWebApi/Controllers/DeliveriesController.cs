@@ -1,4 +1,5 @@
 ﻿using BooshiDAL;
+using BooshiDAL.Interfaces;
 using BooshiDAL.Models;
 using BooshiWebApi.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -18,34 +19,49 @@ namespace BooshiWebApi.Controllers
     [Route("/api/[controller]")]
     public class DeliveriesController : Controller
     {
-        private readonly BooshiDBContext _context;
-        private readonly JwtService _jwtService;
+        private readonly IJwtService _jwtService;
+        private readonly IUserRepository _userRepo;
+        private readonly IDeliveryRepository _deliveryRepo;
 
-        public DeliveriesController(BooshiDBContext context, JwtService jwtService)
+        public DeliveriesController(IJwtService jwtService, IUserRepository userRepo, IDeliveryRepository deliveryRepo)
         {
-            this._context = context;
             this._jwtService = jwtService;
+            this._userRepo = userRepo;
+            this._deliveryRepo = deliveryRepo;
+        }
+
+        [Authorize(Roles ="Admin")]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetDelivery(int id)
+        {
+            var delivery = await _deliveryRepo.GetDeliveryByIdAsync(id);
+            if (delivery == null)
+            {
+                return NotFound();
+            }
+            return Ok(delivery);
         }
 
         [Authorize(Roles = "Admin, DeliveryPerson")]
-        [HttpGet]
-        public async Task<IActionResult> GetAllDeliveriesAsync()
+        [HttpGet("page/{pageNum}")]
+        public async Task<IActionResult> GetAllDeliveriesAsync(int pageNum)
         {
-            var deliveries = await _context.GetAllDeliveriesAsync();
-            if (deliveries.Count < 1)
+            var deliveries = await _deliveryRepo.GetAllDeliveriesByPageAsync(pageNum);
+            var totalDeliveries = _deliveryRepo.GetTotalDeliveriesCount();
+            if (deliveries.Count() < 1)
                 return NoContent();
-            return Ok(deliveries);
+            return Ok(new { deliveries, totalDeliveries });
         }
 
         [Authorize(Roles = "Admin")]
         [HttpGet("{id}/page/{pageNum}")]
         public async Task<IActionResult> GetUserDeliveriesByIdAsync(Guid id, int pageNum)
         {
-            if (await _context.isUserExistsAsync(id) == false)
+            if (await _userRepo.isUserExistsAsync(id) == false)
                 return NotFound("No user found");
-            var deliveries = await _context.GetUserDeliveriesByPageNum(id, pageNum);
-            var totalCount = _context.GetDeliveryCountByUserId(id);
-            if (deliveries.Count < 1)
+            var deliveries = await _deliveryRepo.GetUserDeliveriesByPageNum(id, pageNum);
+            var totalCount = _deliveryRepo.GetDeliveryCountByUserId(id);
+            if (deliveries.Count() < 1)
                 return NoContent();
             return Ok(new { deliveries, totalCount});
         }
@@ -53,12 +69,12 @@ namespace BooshiWebApi.Controllers
         [HttpGet("/deliveryperson/{id}")]
         public async Task<IActionResult> GetDeliveriesByDeliveryPersonAsync(Guid id)
         {
-            var deliveries = await _context.GetDeliveriesByDeliveryPerson(id);
+            var deliveries = await _deliveryRepo.GetDeliveriesByDeliveryPerson(id);
             if (deliveries == null)
             {
                 return BadRequest(new { message = "No delivery person found" });
             }
-            if (deliveries.Count < 1)
+            if (deliveries.Count() < 1)
             {
                 return NoContent();
             }
@@ -69,32 +85,32 @@ namespace BooshiWebApi.Controllers
         public async Task<IActionResult> GetUserDeliveriesAsync(int pageNumber)
         {
             Guid userId = _jwtService.GetUserByTokenAsync(Request);
-            var deliveries = await _context.GetUserDeliveriesByPagesAsync(userId, pageNumber);
-            if (deliveries.Count < 1)
+            var deliveries = await _deliveryRepo.GetUserDeliveriesByPagesAsync(userId, pageNumber);
+            if (deliveries.Count() < 1)
                 return NoContent();
-            var totalCount = _context.GetUserDeliveriesCount(userId);
+            var totalCount = _deliveryRepo.GetDeliveryCountByUserId(userId);
             return Ok(new { deliveries, totalDeliveries = totalCount });
         }
 
         [HttpGet("new-deliveries/page/{pageNumber}")]
         public async Task<IActionResult> GetNewDeliveriesAsync(int pageNumber)
         {
-            var deliveries = await _context.GetNewDeliveriesByPagesAsync(pageNumber);
-            if (deliveries.Count < 1)
+            var deliveries = await _deliveryRepo.GetNewDeliveriesByPagesAsync(pageNumber);
+            if (deliveries.Count() < 1)
                 return NoContent();
-            var totalCount = _context.GetNewDeliveriesCount();
+            var totalCount = _deliveryRepo.GetNewDeliveriesCount();
             return Ok(new { deliveries, totalDeliveries = totalCount });
         }
 
         [HttpPatch("cancel/{deliveryId}")]
         public async Task<IActionResult> CancelDeliveryAsync(int deliveryId)
         {
-            var deliveryStatus = await _context.GetDeliveryStatusAsync(deliveryId);
+            var deliveryStatus = await _deliveryRepo.GetDeliveryStatusAsync(deliveryId);
             if (deliveryStatus != 1)
             {
                 return BadRequest(new { message = "Can't cancel delivery that is not pending." });
             }
-            await _context.ChangeDeliveryStatus(deliveryId, 4);
+            await _deliveryRepo.ChangeDeliveryStatus(deliveryId, 4);
             return Ok();
         }
 
@@ -102,21 +118,32 @@ namespace BooshiWebApi.Controllers
         [HttpPatch("change-status/{deliveryId}")]
         public async Task<IActionResult> ChangeDeliveryStatusAsync(int deliveryId, [FromBody] int statusId)
         {
-            var delivery = await _context.GetDeliveryByIdAsync(deliveryId);
+            var delivery = await _deliveryRepo.GetDeliveryByIdAsync(deliveryId);
             if (delivery == null)
             {
                 return BadRequest(new { message = "Delivery could not be found." });
             }
-            delivery.DeliveryStatusId = statusId;
-            await _context.SaveChangesAsync();
+            await _deliveryRepo.ChangeDeliveryStatus(deliveryId,statusId);
             return Ok();
+        }
+
+        [Authorize(Roles ="Admin")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateDelivery(FullDelivery delivery)
+        {
+            var updatedDelivery = await _deliveryRepo.UpdateDeliveryAsync(delivery);
+            if (updatedDelivery == null)
+            {
+                return NotFound("Delivery not found");
+            }
+            return Ok(updatedDelivery);
         }
 
         [Authorize(Roles = "Admin, DeliveryPerson")]
         [HttpPatch("update-status")]
         public async Task<IActionResult> UpdateDeliveryStatusAsync([FromForm] int deliveryId, [FromForm] int statusId)
         {
-            await _context.ChangeDeliveryStatus(deliveryId, statusId);
+            await _deliveryRepo.ChangeDeliveryStatus(deliveryId, statusId);
             return Ok();
         }
 
@@ -125,7 +152,7 @@ namespace BooshiWebApi.Controllers
         {
             try
             {
-               var delivery = await _context.AddDeliveryAsync(fullDelivery);
+               var delivery = await _deliveryRepo.AddDeliveryAsync(fullDelivery);
                 return Created("/", delivery);
             }
             catch (Exception ex)
@@ -139,10 +166,21 @@ namespace BooshiWebApi.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteDeliveryAsync([FromBody]int id)
         {
-            var success = await _context.DeleteDeliveryAsync(id);
+            var success = await _deliveryRepo.DeleteDeliveryAsync(id);
             if (!success)
                 return BadRequest("Could not delete.");
             return Ok(success);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("status/{statusId}/page/{pageNum}")]
+        public async Task<IActionResult> GetDeliveriesByStatusId(int statusId, int pageNum)
+        {
+            var deliveries = await _deliveryRepo.GetDeliveriesByStatusId(statusId, pageNum);
+            if (deliveries.Count() < 1)
+                return NoContent();
+            var totalDeliveries = _deliveryRepo.GetDeliveryCountByStatusId(statusId);
+            return Ok(new { deliveries, totalDeliveries });
         }
     }
 }
