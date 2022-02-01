@@ -57,6 +57,7 @@ namespace BooshiWebApi
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IDeliveryRepository, DeliveryRepository>();
             services.AddScoped<IDeliveryPersonRepository, DeliveryPersonRepository>();
+            services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
 
             services.AddDbContext<BooshiDBContext>(options =>
             {

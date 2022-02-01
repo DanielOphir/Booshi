@@ -15,9 +15,7 @@ using System.Threading.Tasks;
 namespace BooshiWebApi.Controllers
 {
 
-    [ApiController]
-    [Route("/api/[controller]")]
-    public class DeliveriesController : Controller
+    public class DeliveriesController : BaseController
     {
         private readonly IJwtService _jwtService;
         private readonly IUserRepository _userRepo;

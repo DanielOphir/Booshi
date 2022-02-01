@@ -15,9 +15,7 @@ using System.Threading.Tasks;
 
 namespace BooshiWebApi.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AuthController : Controller
+    public class AuthController : BaseController
     {
         private readonly BooshiDBContext _context;
         private readonly IJwtService _jwtService;

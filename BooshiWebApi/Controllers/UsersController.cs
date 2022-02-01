@@ -12,10 +12,8 @@ using System.Threading.Tasks;
 
 namespace BooshiWebApi.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
     [Authorize(Roles = "Admin, DeliveryPerson")]
-    public class UsersController : Controller
+    public class UsersController : BaseController
     {
         private readonly IUserRepository _userRepo;
 
