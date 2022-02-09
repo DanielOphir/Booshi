@@ -1,0 +1,59 @@
+.pending-status,
+.shipped-status,
+.complete-status,
+.cancelled-status {
+	width: 4.5rem !important;
+}
+
+.pending-status {
+	font-size: 0.8rem;
+}
+
+.shipped-status {
+	font-size: 0.75rem;
+}
+
+.complete-status,
+.cancelled-status {
+	font-size: 0.8rem;
+}
+
+/*sm*/
+@media (min-width: 576px) {
+	.pending-status,
+	.shipped-status,
+	.complete-status,
+	.cancelled-status {
+		width: 5rem !important;
+	}
+}
+
+/*md*/
+@media (min-width: 768px) {
+	.pending-status,
+	.shipped-status,
+	.complete-status,
+	.cancelled-status {
+		font-size: 1rem;
+	}
+	.pending-status,
+	.shipped-status,
+	.complete-status,
+	.cancelled-status {
+		width: 5.5rem !important;
+	}
+}
+
+/*lg*/
+@media (min-width: 992px) {
+	.pending-status,
+	.shipped-status,
+	.complete-status,
+	.cancelled-status {
+		width: 6rem !important;
+	}
+}
+
+/*xl*/
+@media (min-width: 1200px) {
+}

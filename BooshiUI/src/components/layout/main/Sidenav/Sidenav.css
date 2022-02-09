@@ -1,0 +1,44 @@
+.sidenav {
+	min-height: calc(100vh - 4.9rem);
+	height: 100%;
+	box-shadow: 0.25rem 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+	position: sticky;
+	left: 0;
+	top: 3.6rem;
+}
+
+.sidenav-item {
+	border-left: transparent 2px solid;
+}
+
+.sidenav-item:hover,
+.active {
+	text-decoration: none !important;
+	border-left: white 2px solid;
+}
+
+i {
+	font-size: 22px;
+}
+
+/*sm*/
+@media (min-width: 576px) {
+}
+
+/*md*/
+@media (min-width: 768px) {
+	i {
+		font-size: 18px;
+	}
+}
+
+.lg-text-left {
+	text-align: center !important;
+}
+
+/*lg*/
+@media (min-width: 992px) {
+	.lg-text-left {
+		text-align: left !important;
+	}
+}

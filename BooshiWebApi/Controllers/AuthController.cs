@@ -1,4 +1,5 @@
 ﻿using BooshiDAL;
+using BooshiDAL.Extensions;
 using BooshiDAL.Interfaces;
 using BooshiDAL.Models;
 using BooshiWebApi.Models;
@@ -76,12 +77,16 @@ namespace BooshiWebApi.Controllers
         {
             var user = await _userRepo.GetUserByUsernameAsync(loginModel.UserName);
             if (user == null)
-            {
                 return BadRequest(new {message= "Either your username or password is incorrect" });
-            }
-            if (!BCrypt.Net.BCrypt.Verify(loginModel.Password, user.Password))
+            if (user.TempPassword != null && !BCrypt.Net.BCrypt.Verify(loginModel.Password, user.Password))
             {
-                return BadRequest(new { message = "Either your username or password is incorrect" });
+                if (!BCrypt.Net.BCrypt.Verify(loginModel.Password, user.TempPassword))
+                    return BadRequest(new { message = "Either your username or password is incorrect" });
+            }
+            else
+            {
+                if (!BCrypt.Net.BCrypt.Verify(loginModel.Password, user.Password))
+                    return BadRequest(new { message = "Either your username or password is incorrect" });
             }
             var token = await _jwtService.Generate(user.Id);
             return Ok(new {token});
@@ -89,36 +94,55 @@ namespace BooshiWebApi.Controllers
 
          [HttpGet("user")]
          public async Task<IActionResult> GetUser()
-        {
-            User user;
-            var jwtToken = Request.Headers["Authorization"].ToString().Substring(7);
-            var userId = _jwtService.GetUserByTokenAsync(jwtToken);
-            user = await _userRepo.GetUserByIdAsync(userId);
+         {
+            var userId = _jwtService.GetUserByTokenAsync(Request);
+            var user = await _userRepo.GetUserByIdAsync(userId);
             return Ok(user);
-        }
+         }
 
         [HttpGet("fulluser")]
         public async Task<IActionResult> GetFullUser()
         {
             FullUser user;
-            var jwtToken = Request.Headers["Authorization"].ToString().Substring(7);
-            var userId = _jwtService.GetUserByTokenAsync(jwtToken);
+            var userId = _jwtService.GetUserByTokenAsync(Request);
             user = await _userRepo.GetUserInfoByIdAsync(userId);
             return Ok(user);
         }
 
-        [HttpPost("logout")]
-        public IActionResult Logout()
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody]string password)
         {
+            var userId = _jwtService.GetUserByTokenAsync(Request);
+            var encryptedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+            var isSuccess = await _userRepo.ChangeUserPassword(userId, encryptedPassword);
+            if (isSuccess)
+                return Ok();
+            return BadRequest();
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> GetRandomPassword([FromBody]string userName)
+        {
+            var user = await _userRepo.GetUserByUsernameAsync(userName);
+            if (user == null)
+            {
+                return Ok();
+            }
+            var tempPassword = HelperMethods.GenerateRandomPassword(8);
+            var encryptedTempPassword = BCrypt.Net.BCrypt.HashPassword(tempPassword);
+            var isSuccess = await _userRepo.SetTempPassword(user.Id, encryptedTempPassword);
+            if (!isSuccess)
+                return BadRequest("Something went wrong.");
             try
             {
-                Response.Cookies.Delete("jwt");
-                return Ok("logged out");
+                _mailService.SendMail(user.Email, "New password", $"Your temp password is - {tempPassword}");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return BadRequest(ex);
+                return BadRequest("Something went wrong");
             }
+            return Ok();
         }
+
     }
 }

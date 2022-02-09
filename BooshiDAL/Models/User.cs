@@ -17,6 +17,8 @@ namespace BooshiDAL.Models
 
         [JsonIgnore]
         public string Password { get; set; }
+        [JsonIgnore]
+        public string TempPassword { get; set; }
         public int RoleId { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public bool IsActiveUser { get; set; }

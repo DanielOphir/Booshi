@@ -31,7 +31,7 @@ namespace BooshiWebApi.Filters
             if (context.Exception is Exception)
             {
                 context.HttpContext.Response.StatusCode = 400;
-                httpContext.Response.WriteAsJsonAsync(new { Message = context.Exception.InnerException.Message });
+                httpContext.Response.WriteAsJsonAsync(new { Message = context.Exception.Message });
                 context.ExceptionHandled = true;
                 return;
             }

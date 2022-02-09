@@ -1,0 +1,59 @@
+{
+	"name": "booshiui",
+	"version": "0.1.0",
+	"private": true,
+	"dependencies": {
+		"@fortawesome/fontawesome-free": "^5.15.4",
+		"@hookform/resolvers": "^2.8.5",
+		"@testing-library/jest-dom": "^5.16.1",
+		"@testing-library/react": "^12.1.2",
+		"@testing-library/user-event": "^13.5.0",
+		"axios": "^0.24.0",
+		"bootstrap": "^4.6.1",
+		"chart.js": "^3.7.0",
+		"firebase-tools": "^10.1.5",
+		"jquery": "^3.6.0",
+		"lodash": "^4.17.21",
+		"popper.js": "^1.16.1",
+		"primereact": "^7.1.0",
+		"react": "^17.0.2",
+		"react-chartjs-2": "^4.0.1",
+		"react-confirm-alert": "^2.7.0",
+		"react-datepicker": "^4.6.0",
+		"react-dom": "^17.0.2",
+		"react-hook-form": "^7.22.5",
+		"react-redux": "^7.2.6",
+		"react-router-dom": "^6.2.1",
+		"react-router-hash-link": "^2.4.3",
+		"react-scripts": "5.0.0",
+		"react-transition-group": "^4.4.2",
+		"redux": "^4.1.2",
+		"redux-thunk": "^2.4.1",
+		"web-vitals": "^2.1.2",
+		"yup": "^0.32.11"
+	},
+	"scripts": {
+		"start": "react-scripts start",
+		"build": "react-scripts build",
+		"test": "react-scripts test",
+		"eject": "react-scripts eject"
+	},
+	"eslintConfig": {
+		"extends": [
+			"react-app",
+			"react-app/jest"
+		]
+	},
+	"browserslist": {
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
+	}
+}

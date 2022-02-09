@@ -27,6 +27,7 @@ namespace BooshiDAL.Repositories
         public async Task<FullUser> AddUserAsync(User user, UserDetails userDetails)
         {
             await _context.Users.AddAsync(user);
+            userDetails.UserId = user.Id;
             await _context.UsersDetails.AddAsync(userDetails);
             await _context.SaveChangesAsync();
             var fullUser = new FullUser(user, userDetails);
@@ -90,7 +91,7 @@ namespace BooshiDAL.Repositories
         /// <returns>Returns the user that matches the username, or null if not exists</returns>
         public async Task<User> GetUserByUsernameAsync(string username)
         {
-            var user = _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
+            var user = _context.Users.SingleOrDefaultAsync(u => u.UserName == username);
             return await user;
         }
 
@@ -110,9 +111,9 @@ namespace BooshiDAL.Repositories
         /// Gets the number of users in Users table
         /// </summary>
         /// <returns>Returns int of users in Users table</returns>
-        public int GetUsersCount()
+        public int GetUsersCount(int roleId)
         {
-            return GetAllUsersQuery().Count();
+            return GetAllUsersQuery().AsEnumerable().Where(user => user.RoleId == roleId).Count();
         }
 
         /// <summary>
@@ -182,18 +183,50 @@ namespace BooshiDAL.Repositories
         /// </summary>
         /// <param name="pageNum">Page number</param>
         /// <returns>Returns list of 10 or less users by page number</returns>
-        public async Task<IEnumerable<FullUser>> GetUsersByPageAsync(int pageNum)
+        public async Task<IEnumerable<FullUser>> GetUsersByPageAsync(int pageNum, int roleId)
         {
-            var usersList = GetAllUsersQuery().Skip(pageNum * 10 - 10).Take(10);
-            return await usersList.ToListAsync();
+            var usersList = await GetAllUsersQuery().ToListAsync();
+            var rtnUsers = usersList.Where(user => user.RoleId == roleId).Skip(pageNum * 10 - 10).Take(10);
+            return rtnUsers;
         }
 
-        public async Task<IEnumerable<FullUser>> GetUsersByUsernameByPageAsync(string userName, int pageNum)
+        public async Task<IEnumerable<FullUser>> GetUsersByUsernameByPageAsync(string userName, int pageNum, int roleId)
         {
 
             var usersList = await GetAllUsersQuery().ToListAsync();
-            return usersList.Where(user => user.UserName.Contains(userName)).Skip(pageNum * 10 - 10).Take(10);
+            return usersList.Where(user => user.UserName.Contains(userName) && user.RoleId == roleId).Skip(pageNum * 10 - 10).Take(10);
 
+        }
+
+        public async Task<int> GetUsersByUsernameCount(string userName, int roleId)
+        {
+            var usersList = await GetAllUsersQuery().ToListAsync();
+            return usersList.Where(user => user.UserName.Contains(userName) && user.RoleId == roleId).Count();
+        }
+
+        public async Task<bool> ChangeUserPassword(Guid id, string password)
+        {
+            var user = await _context.Users.SingleOrDefaultAsync(user => user.Id == id);
+            if (user == null)
+            {
+                return false;
+            }
+            user.Password = password;
+            user.TempPassword = null;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> SetTempPassword(Guid id, string password)
+        {
+            var user = await _context.Users.SingleOrDefaultAsync(user => user.Id == id);
+            if (user == null)
+            {
+                return false;
+            }
+            user.TempPassword = password;
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

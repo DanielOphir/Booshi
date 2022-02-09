@@ -1,0 +1,47 @@
+.icon-container {
+	margin-top: 1.5rem;
+}
+
+.icon-container > a > i {
+	font-size: 30px;
+	color: white;
+}
+
+.icon-container > a :hover {
+	color: rgb(190, 190, 190);
+}
+
+/*sm*/
+@media (min-width: 576px) {
+	.icon-container {
+		margin-top: 2rem;
+	}
+}
+
+/*md*/
+@media (min-width: 783px) {
+	.icon-container {
+		margin-top: 4.2rem;
+	}
+}
+/*lg*/
+@media (min-width: 992px) {
+	.icon-container {
+		margin-top: 2rem;
+	}
+}
+
+@media (min-width: 1142px) {
+	.icon-container {
+		margin-top: 4rem;
+	}
+}
+/*xl*/
+@media (min-width: 1200px) {
+	.icon-container > a > i {
+		font-size: 36px;
+	}
+	.icon-container {
+		margin-top: 3.5rem;
+	}
+}

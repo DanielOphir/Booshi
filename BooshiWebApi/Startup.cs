@@ -83,15 +83,11 @@ namespace BooshiWebApi
             services.AddAuthorization();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "BooshiWebApi v1"));
-            }
 
             app.UseHttpsRedirection();
 
@@ -101,7 +97,7 @@ namespace BooshiWebApi
                 options
                 .AllowAnyHeader()
                 .AllowAnyMethod()
-                .WithOrigins("http://localhost:3000")
+                .AllowAnyOrigin()
             );
 
             app.UseAuthentication();

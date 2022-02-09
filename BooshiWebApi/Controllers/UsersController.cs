@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace BooshiWebApi.Controllers
 {
-    [Authorize(Roles = "Admin, DeliveryPerson")]
+   // [Authorize(Roles = "Admin, DeliveryPerson")]
     public class UsersController : BaseController
     {
         private readonly IUserRepository _userRepo;
@@ -36,10 +36,10 @@ namespace BooshiWebApi.Controllers
         [HttpGet("page/{pageNum}")]
         public async Task<IActionResult> GetUsersByPage(int pageNum)
         {
-            var users = await _userRepo.GetUsersByPageAsync(pageNum);
+            var users = await _userRepo.GetUsersByPageAsync(pageNum, 3);
             if (users.Count() > 0)
             {
-                var totalCount = _userRepo.GetUsersCount();
+                var totalCount = _userRepo.GetUsersCount(3);
                 return Ok(new { users, totalCount});
             }
             return NoContent();
@@ -48,10 +48,10 @@ namespace BooshiWebApi.Controllers
         [HttpGet("{userName}/page/{pageNum}")]
         public async Task<IActionResult> GetUsersByUserNameByPage(string userName, int pageNum)
         {
-            var users = await _userRepo.GetUsersByUsernameByPageAsync(userName, pageNum);
+            var users = await _userRepo.GetUsersByUsernameByPageAsync(userName, pageNum, 3);
             if (users.Count() > 0)
             {
-                var totalCount = _userRepo.GetUsersCount();
+                var totalCount = await _userRepo.GetUsersByUsernameCount(userName, 3);
                 return Ok(new { users, totalCount });
             }
             return NotFound();
@@ -68,6 +68,7 @@ namespace BooshiWebApi.Controllers
             return NotFound();
         }
 
+        [Authorize(Roles = "Admin, DeliveryPerson, User")]
         [HttpPatch("update")]
         public async Task<IActionResult> UpdateUser(FullUser user)
         {

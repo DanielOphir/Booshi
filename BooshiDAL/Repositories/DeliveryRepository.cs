@@ -29,7 +29,7 @@ namespace BooshiDAL.Repositories
 
         public async Task<IEnumerable<FullDelivery>> GetAllDeliveriesByPageAsync(int pageNum)
         {
-            return await GetAllDeliveriesQuery().Skip(pageNum * 10 - 10).OrderByDescending(delivery => delivery.Delivery.Created).Take(10).ToListAsync();
+            return await GetAllDeliveriesQuery().OrderByDescending(delivery => delivery.Delivery.Created).Skip(pageNum * 10 - 10).Take(10).ToListAsync();
         }
 
         public async Task<Delivery> AsignDeliveryPerson(int deliveryId, Guid deliveryPersonId)
@@ -70,14 +70,8 @@ namespace BooshiDAL.Repositories
             };
 
             await _context.Deliveries.AddAsync(delivery);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            await _context.SaveChangesAsync();
+         
             var origin = new Origin
             {
                 DeliveryId = delivery.Id,

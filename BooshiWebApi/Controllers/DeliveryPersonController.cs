@@ -10,18 +10,23 @@ using System.Threading.Tasks;
 
 namespace BooshiWebApi.Controllers
 {
+    [Authorize(Roles = "DeliveryPerson, Admin")]
     public class DeliveryPersonController : BaseController
     {
         private readonly IJwtService _jwtService;
         private readonly IDeliveryRepository _deliveryRepo;
         private readonly IDeliveryPersonRepository _deliveryPersonRepo;
+        private readonly IUserRepository _userRepo;
 
-        public DeliveryPersonController(IJwtService jwtService, IDeliveryRepository deliveryRepo, IDeliveryPersonRepository deliveryPersonRepo)
+        public DeliveryPersonController(IJwtService jwtService, IDeliveryRepository deliveryRepo, IDeliveryPersonRepository deliveryPersonRepo, IUserRepository userRepo)
         {
             this._jwtService = jwtService;
             this._deliveryRepo = deliveryRepo;
             this._deliveryPersonRepo = deliveryPersonRepo;
+            this._userRepo = userRepo;
         }
+
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> AddDeliveryPersonAsync([FromBody]Guid id)
         {
@@ -65,8 +70,7 @@ namespace BooshiWebApi.Controllers
             return Ok(deliveryPeople);
         }
 
-        [Authorize(Roles="DeliveryPerson, Admin")]
-        [HttpGet("page/{pageNum}")]
+        [HttpGet("deliveries/page/{pageNum}")]
         public async Task<IActionResult> GetDeliveriesByDeliveryPerson(int pageNum)
         {
             var deliveryPersonId = _jwtService.GetUserByTokenAsync(Request);
@@ -79,6 +83,41 @@ namespace BooshiWebApi.Controllers
             return Ok(new { deliveries, totalDeliveries });
         }
 
+        [HttpGet("deliveries/{deliveryPersonId}/page/{pageNum}")]
+        public async Task<IActionResult> GetDeliveriesByDeliveryPersonId(int pageNum, Guid deliveryPersonId)
+        {
+            var deliveries = await _deliveryRepo.GetDeliveriesByDeliveryPerson(deliveryPersonId, pageNum);
+            if (deliveries.Count() < 1)
+            {
+                return NoContent();
+            }
+            var totalDeliveries = _deliveryRepo.GetDeliveryPersonDeliveriesCount(deliveryPersonId);
+            return Ok(new { deliveries, totalCount = totalDeliveries });
+        }
+
+        [HttpGet("page/{pageNum}")]
+        public async Task<IActionResult> GetDeliveryPersonsByPageNumber(int pageNum)
+        {
+            var deliveryPersons = await _userRepo.GetUsersByPageAsync(pageNum, 2);
+            if (deliveryPersons.Count() < 1)
+            {
+                return NoContent();
+            }
+            var totalDeliveryPersons = _userRepo.GetUsersCount(2);
+            return Ok(new { users = deliveryPersons, totalCount = totalDeliveryPersons });
+        }
+
+        [HttpGet("{userName}/page/{pageNum}")]
+        public async Task<IActionResult> GetUsersByUserNameByPage(string userName, int pageNum)
+        {
+            var deliveryPersons = await _userRepo.GetUsersByUsernameByPageAsync(userName, pageNum, 2);
+            if (deliveryPersons.Count() > 0)
+            {
+                var totalDeliveryPersons = await _userRepo.GetUsersByUsernameCount(userName, 2);
+                return Ok(new { users = deliveryPersons, totalCount = totalDeliveryPersons });
+            }
+            return NotFound();
+        }
 
         [HttpPatch("asign-self")]
         public async Task<IActionResult> AsignSelfDeliveryPerson([FromBody]int deliveryId)

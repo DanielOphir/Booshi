@@ -8,7 +8,8 @@ namespace BooshiDAL.Interfaces
 {
     public interface IAnalyticsRepository
     {
-        public Task<Dictionary<int, int>> GetNewUsersByMonth();
-        public Task<Dictionary<int, int>> GetDeliveriesByMonth();
+        public Task<List<int>> GetNewUsersByMonth();
+        public Task<List<int>> GetDeliveriesByMonth();
+        public List<int> GetReport(DateTime from, DateTime to);
     }
 }

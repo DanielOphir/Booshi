@@ -20,10 +20,13 @@ namespace BooshiDAL.Interfaces
         public Task<bool> DeleteUserByIdAsync(Guid id);
         public Task<FullUser> AddUserAsync(User user, UserDetails userDetails);
         public Task<string> GetRoleNameByUserIdAsync(Guid id);
-        public Task<IEnumerable<FullUser>> GetUsersByPageAsync(int pageNum);
-        public Task<IEnumerable<FullUser>> GetUsersByUsernameByPageAsync(string userName, int pageNum);
-        public int GetUsersCount();
+        public Task<IEnumerable<FullUser>> GetUsersByPageAsync(int pageNum, int roleId);
+        public Task<IEnumerable<FullUser>> GetUsersByUsernameByPageAsync(string userName, int pageNum, int roleId);
+        public Task<int> GetUsersByUsernameCount(string userName, int roleId);
 
+        public Task<bool> ChangeUserPassword(Guid id, string password);
+        public Task<bool> SetTempPassword(Guid id, string password);
+        public int GetUsersCount(int roleId);
 
     }
 }
