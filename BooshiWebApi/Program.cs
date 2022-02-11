@@ -30,6 +30,7 @@ namespace BooshiWebApi
 
                 await Seed.SeedUsers(context);
 
+                await Seed.SeedDeliveriesStatuses(context);
             }
             catch (Exception ex)
             {

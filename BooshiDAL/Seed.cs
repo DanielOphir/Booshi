@@ -111,5 +111,21 @@ namespace BooshiDAL
 
             await context.SaveChangesAsync();
         }
+
+        public static async Task SeedDeliveriesStatuses(BooshiDBContext context)
+        {
+            if (await context.DeliveryStatuses.AnyAsync()) return;
+
+            var deliveryStatuses = new List<DeliveryStatus>()
+            {
+                new DeliveryStatus { Status = "Pending"},
+                new DeliveryStatus { Status = "In Progress"},
+                new DeliveryStatus { Status = "Completed"},
+                new DeliveryStatus { Status = "Cancelled"}
+            };
+
+            await context.DeliveryStatuses.AddRangeAsync(deliveryStatuses);
+            await context.SaveChangesAsync();
+        }
     }
 }
