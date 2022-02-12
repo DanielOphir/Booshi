@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { HashLink as Link } from 'react-router-hash-link';
 
+// All of the navbar links.
 class NavLinks extends Component {
 	links = [
 		{
@@ -24,6 +25,7 @@ class NavLinks extends Component {
 	render() {
 		return (
 			<React.Fragment>
+				{/* Mapping through all the links and returning the list for the links. */}
 				{this.links.map((link) => {
 					return (
 						<li

@@ -22,6 +22,11 @@ namespace BooshiWebApi.Services
         {
             this._userRepo = userRepo;
         }
+        /// <summary>
+        /// Generates new JWT token
+        /// </summary>
+        /// <param name="id">User id</param>
+        /// <returns>string of jwt token</returns>
         public async Task<string> Generate(Guid id)
         {
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secureKey));
@@ -37,7 +42,11 @@ namespace BooshiWebApi.Services
             var securityToken = new JwtSecurityToken(header, payload);
             return new JwtSecurityTokenHandler().WriteToken(securityToken);
         }
-
+        /// <summary>
+        /// Veryfing certain token
+        /// </summary>
+        /// <param name="token">JWT token</param>
+        /// <returns></returns>
         public JwtSecurityToken Verify(string token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -54,6 +63,12 @@ namespace BooshiWebApi.Services
 
             return (JwtSecurityToken) validatedToken;
         }
+        
+        /// <summary>
+        /// Get user id by token (from the request headers)
+        /// </summary>
+        /// <param name="request">The http request</param>
+        /// <returns>Guid of user</returns>
         public Guid GetUserByTokenAsync(HttpRequest request)
         {
             var jwtToken = request.Headers["Authorization"].ToString().Substring(7);
@@ -62,6 +77,11 @@ namespace BooshiWebApi.Services
             Guid userId = Guid.Parse(token.Issuer);
             return userId;
         }
+        /// <summary>
+        /// Get user id by token
+        /// </summary>
+        /// <param name="jwtToken">JWT token</param>
+        /// <returns>Guid of user</returns>
         public Guid GetUserByTokenAsync(string jwtToken)
         {
             JwtSecurityToken token;

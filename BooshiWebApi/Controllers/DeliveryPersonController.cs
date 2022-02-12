@@ -59,17 +59,6 @@ namespace BooshiWebApi.Controllers
             return Ok(deliveryPeople);
         }
 
-        [HttpGet("{isActive}")]
-        public async Task<IActionResult> GetDeliveryPeopleByActivityAsync(bool isActive)
-        {
-            var deliveryPeople = await _deliveryPersonRepo.GetDeliveryPeopleByActivityAsync(isActive);
-            if (deliveryPeople.Count() < 1)
-            {
-                return NoContent();
-            }
-            return Ok(deliveryPeople);
-        }
-
         [HttpGet("deliveries/page/{pageNum}")]
         public async Task<IActionResult> GetDeliveriesByDeliveryPerson(int pageNum)
         {

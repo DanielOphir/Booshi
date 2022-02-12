@@ -83,6 +83,11 @@ namespace BooshiDAL
             return users;
         }
 
+        /// <summary>
+        /// Seeding the roles to database if not exists
+        /// </summary>
+        /// <param name="context">DB Context</param>
+        /// <returns></returns>
         public static async Task SeedRoles(BooshiDBContext context)
         {
             if (await context.Roles.AnyAsync()) return;
@@ -97,6 +102,11 @@ namespace BooshiDAL
             await context.Roles.AddRangeAsync(roles);
         }
 
+        /// <summary>
+        /// Seeding the users to database if not exists
+        /// </summary>
+        /// <param name="context">DB Context</param>
+        /// <returns></returns>
         public static async Task SeedUsers(BooshiDBContext context)
         {
             if (await context.Users.AnyAsync() || await context.UsersDetails.AnyAsync()) return;
@@ -107,11 +117,20 @@ namespace BooshiDAL
             {
                 await context.Users.AddAsync(user.user);
                 await context.UsersDetails.AddAsync(user.userDetails);
+                if (user.user.RoleId == 2)
+                {
+                    await context.DeliveryPeople.AddAsync(new DeliveryPerson { UserId = user.user.Id, IsActiveDeliveryPerson = true });
+                }
             }
 
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Seeding the delivery statuses to database if not exists
+        /// </summary>
+        /// <param name="context">DB Context</param>
+        /// <returns></returns>
         public static async Task SeedDeliveriesStatuses(BooshiDBContext context)
         {
             if (await context.DeliveryStatuses.AnyAsync()) return;

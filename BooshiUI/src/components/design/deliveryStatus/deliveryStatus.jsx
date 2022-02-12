@@ -1,6 +1,7 @@
 import React from 'react';
 import './deliveryStatus.css';
 
+// Delivery status alerts
 function DeliveryStatus(props) {
 	switch (props.statusId) {
 		case 1:

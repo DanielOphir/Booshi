@@ -56,7 +56,7 @@ class Main extends PureComponent {
 					}
 				/>
 				<Route
-					path='deliverypanel'
+					path='deliverypanel/*'
 					element={
 						this.props.user?.roleId === 2 ? (
 							<DeliveryPanel />
@@ -70,16 +70,6 @@ class Main extends PureComponent {
 					element={
 						this.props.user?.roleId === 3 ? (
 							<UserPanel />
-						) : (
-							<Unauthorized />
-						)
-					}
-				/>
-				<Route
-					path='deliverypanel/*'
-					element={
-						this.props.user?.roleId === 2 ? (
-							<DeliveryPanel />
 						) : (
 							<Unauthorized />
 						)

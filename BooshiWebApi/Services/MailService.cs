@@ -15,9 +15,17 @@ namespace BooshiWebApi.Services
 
         public bool SendMail(string to, string header, string body)
         {
-            string emailAdress = _configuration.GetSection("Email")["EmailAddress"];
-            string password = _configuration.GetSection("Email")["Password"];
-
+            string emailAdress = "";
+            string password = "";
+            try { 
+            emailAdress = _configuration.GetSection("Email")["EmailAddress"];
+            password = _configuration.GetSection("Email")["Password"];
+                if (string.IsNullOrEmpty(emailAdress) || string.IsNullOrEmpty(password))
+                    throw new ArgumentNullException();
+            }
+            catch {
+                return false;
+            }
             System.Net.Mail.MailMessage mail = new System.Net.Mail.MailMessage();
             mail.To.Add(to);
             mail.From = new MailAddress(emailAdress, "Booshi", System.Text.Encoding.UTF8);

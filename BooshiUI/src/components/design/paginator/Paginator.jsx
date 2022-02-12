@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { SetPage } from '../../../redux/paginator/paginatorActions';
 
+// Paginator component that will be used in every table in the project
 const Paginator = ({ pageNum, ...props }) => {
 	let pages = [];
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import './Footer.css';
 
+// Footer component
 const Footer = () => {
 	return (
 		<div
@@ -20,24 +21,28 @@ const Footer = () => {
 							<a
 								href='https://github.com/DanielOphir/'
 								target={'_blank'}
+								rel='noreferrer'
 								className='col-auto text-center'>
 								<i className='fab fa-github'></i>
 							</a>
 							<a
 								href='https://www.linkedin.com/in/danielophir/'
 								target={'_blank'}
+								rel='noreferrer'
 								className='col-auto text-center'>
 								<i className='fab fa-linkedin'></i>
 							</a>
 							<a
 								href='https://www.facebook.com/daniel.ophir.5'
 								target={'_blank'}
+								rel='noreferrer'
 								className='col-auto text-center'>
 								<i className='fab fa-facebook'></i>
 							</a>
 							<a
 								href='https://www.instagram.com/daniel.ophir/'
 								target={'_blank'}
+								rel='noreferrer'
 								className='col-auto text-center'>
 								<i className='fab fa-instagram'></i>
 							</a>

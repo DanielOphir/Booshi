@@ -47,11 +47,14 @@ namespace BooshiWebApi
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
             
+            // Adding swagger
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BooshiWebApi", Version = "v1" });
             });
             services.AddCors();
+
+            // Adding scoped serviced
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<MailService>();
             services.AddScoped<IUserRepository, UserRepository>();
@@ -59,10 +62,13 @@ namespace BooshiWebApi
             services.AddScoped<IDeliveryPersonRepository, DeliveryPersonRepository>();
             services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
 
+            // Adding DB context service
             services.AddDbContext<BooshiDBContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("BooshiDB"));
             });
+
+            // Adding JWT Bearer service
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = "JwtBearer";
@@ -85,9 +91,13 @@ namespace BooshiWebApi
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // Swagger is enabled only in development
+            if (env.IsDevelopment())
+            {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "BooshiWebApi v1"));
+            }
 
             app.UseHttpsRedirection();
 

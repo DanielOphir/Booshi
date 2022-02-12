@@ -6,7 +6,6 @@ import { api } from './utils/helpers/AxiosHelper';
 import * as authActions from './redux/auth/authActions';
 import { GetToken, RemoveToken } from './utils/helpers/TokenHelper';
 import Loading from './views/loading/Loading';
-import '../node_modules/primereact/resources/themes/bootstrap4-dark-blue/theme.css';
 import { SetNetworkError } from './redux/networkError/networkErrorActions';
 import {
 	Chart as ChartJS,

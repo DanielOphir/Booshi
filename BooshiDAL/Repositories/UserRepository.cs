@@ -190,6 +190,13 @@ namespace BooshiDAL.Repositories
             return rtnUsers;
         }
 
+        /// <summary>
+        /// Gets the top 10 users by username by the page number
+        /// </summary>
+        /// <param name="userName">User's username</param>
+        /// <param name="pageNum">Page number that you want to get</param>
+        /// <param name="roleId">User's role</param>
+        /// <returns>List of users that thier username incldues the username in the parameter</returns>
         public async Task<IEnumerable<FullUser>> GetUsersByUsernameByPageAsync(string userName, int pageNum, int roleId)
         {
 
@@ -198,12 +205,24 @@ namespace BooshiDAL.Repositories
 
         }
 
+        /// <summary>
+        /// Gets the count of users by certain username - for the paginator
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="roleId"></param>
+        /// <returns>Number of users that thier username contains the username in the params</returns>
         public async Task<int> GetUsersByUsernameCount(string userName, int roleId)
         {
             var usersList = await GetAllUsersQuery().ToListAsync();
             return usersList.Where(user => user.UserName.Contains(userName) && user.RoleId == roleId).Count();
         }
 
+        /// <summary>
+        /// Changes user's password
+        /// </summary>
+        /// <param name="id">User's id</param>
+        /// <param name="password">New password</param>
+        /// <returns>Boolean whether the password changes successfuly or failed.</returns>
         public async Task<bool> ChangeUserPassword(Guid id, string password)
         {
             var user = await _context.Users.SingleOrDefaultAsync(user => user.Id == id);
@@ -217,6 +236,12 @@ namespace BooshiDAL.Repositories
             return true;
         }
 
+        /// <summary>
+        /// Setting temporary password for certain user
+        /// </summary>
+        /// <param name="id">User's id</param>
+        /// <param name="password">Temporary password</param>
+        /// <returns>Boolean whether the temporary password changes successfuly or failed.</returns>
         public async Task<bool> SetTempPassword(Guid id, string password)
         {
             var user = await _context.Users.SingleOrDefaultAsync(user => user.Id == id);

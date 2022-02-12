@@ -17,7 +17,10 @@ namespace BooshiDAL.Repositories
         {
             this._context = context;
         }
-
+        /// <summary>
+        /// Gets all of the deliveries.
+        /// </summary>
+        /// <returns>IQueryable form of all of the deliveries</returns>
         public IQueryable<FullDelivery> GetAllDeliveriesQuery()
         {
             var deliveriesList = (from deliveries in _context.Deliveries
@@ -27,11 +30,23 @@ namespace BooshiDAL.Repositories
             return deliveriesList;
         }
 
+        /// <summary>
+        /// Gets all of the deliveries by page number
+        /// </summary>
+        /// <param name="pageNum">Page number</param>
+        /// <returns>List of deliveries</returns>
         public async Task<IEnumerable<FullDelivery>> GetAllDeliveriesByPageAsync(int pageNum)
         {
             return await GetAllDeliveriesQuery().OrderByDescending(delivery => delivery.Delivery.Created).Skip(pageNum * 10 - 10).Take(10).ToListAsync();
         }
 
+        /// <summary>
+        /// Asigning certain delivery person to delivery
+        /// </summary>
+        /// <param name="deliveryId">Delivery id</param>
+        /// <param name="deliveryPersonId">Delivery person id</param>
+        /// <returns>Delivery after the change.</returns>
+        /// <exception cref="Exception">Throwing exception if the delivery or delivery person doesnt exists.</exception>
         public async Task<Delivery> AsignDeliveryPerson(int deliveryId, Guid deliveryPersonId)
         {
             var deliveryPerson = await _context.Users.Where(user => user.RoleId == 2).FirstOrDefaultAsync(dp => dp.Id == deliveryPersonId);
@@ -48,7 +63,11 @@ namespace BooshiDAL.Repositories
             await _context.SaveChangesAsync();
             return delivery.Delivery;
         }
-
+        /// <summary>
+        /// Gets certain delivery by its id
+        /// </summary>
+        /// <param name="deliveryId">Delivery id</param>
+        /// <returns></returns>
         public async Task<FullDelivery> GetDeliveryByIdAsync(int deliveryId)
         {
             return await GetAllDeliveriesQuery().FirstOrDefaultAsync(delivery => delivery.Delivery.Id == deliveryId);
@@ -130,15 +149,30 @@ namespace BooshiDAL.Repositories
             return await deliveries.ToListAsync();
         }
 
+        /// <summary>
+        /// Get the count of deliveries by certain user - for paginator
+        /// </summary>
+        /// <param name="id">User id</param>
+        /// <returns>Number of deliveries of certain user</returns>
         public int GetDeliveryCountByUserId(Guid id)
         {
             return GetAllDeliveriesQuery().Where(delivery => delivery.Delivery.UserId == id).Count();
         }
+
+        /// <summary>
+        /// Get the count of deliveries by certain status id - for paginator
+        /// </summary>
+        /// <param name="statusId">Status id of delivery</param>
+        /// <returns>Number of deliveries of certain status id</returns>
         public int GetDeliveryCountByStatusId(int statusId)
         {
             return GetAllDeliveriesQuery().Where(delivery => delivery.Delivery.DeliveryStatusId == statusId).Count();
         }
 
+        /// <summary>
+        /// Get the count of all deliveries - for paginator
+        /// </summary>
+        /// <returns>Number of all of the deliveries</returns>
         public int GetTotalDeliveriesCount()
         {
             return GetAllDeliveriesQuery().Count();
@@ -156,6 +190,11 @@ namespace BooshiDAL.Repositories
             return await deliveries.ToListAsync();
         }
 
+        /// <summary>
+        /// Get the deliveries that's not assigned to any delivery person by page number
+        /// </summary>
+        /// <param name="pageNumber">Page number</param>
+        /// <returns>List of new deliveries</returns>
         public async Task<IEnumerable<FullDelivery>> GetNewDeliveriesByPagesAsync(int pageNumber)
         {
             var deliveries = GetAllDeliveriesQuery().Where(delivery => delivery.Delivery.DeliveryStatusId == 1 && delivery.Delivery.DeliveryPersonId == null).OrderBy(x => x.Delivery.Created).Skip(pageNumber * 10 - 10).Take(10);
@@ -180,17 +219,29 @@ namespace BooshiDAL.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
-
+        /// <summary>
+        /// Get the total count of deliveries which not asigned to any delivery person
+        /// </summary>
+        /// <returns></returns>
         public int GetNewDeliveriesCount()
         {
             return GetAllDeliveriesQuery().Where(delivery => delivery.Delivery.DeliveryStatusId == 1 && delivery.Delivery.DeliveryPersonId == null).Count();
         }
-
+        /// <summary>
+        /// Get the total count of deliveries of certain delivery person - for paginator
+        /// </summary>
+        /// <param name="id">Delivery person id</param>
+        /// <returns>Number of deliveries of delivery person</returns>
         public int GetDeliveryPersonDeliveriesCount(Guid id)
         {
             return GetAllDeliveriesQuery().Where(delivery => delivery.Delivery.DeliveryPersonId == id).Count();
         }
-
+        /// <summary>
+        /// Get the status id of certain delivery
+        /// </summary>
+        /// <param name="deliveryId">Delivery id</param>
+        /// <returns>The status code of the delivery</returns>
+        /// <exception cref="ArgumentException">Throwing an exception if delivery doesnt exist</exception>
         public async Task<int> GetDeliveryStatusAsync(int deliveryId)
         {
             var delivery = await _context.Deliveries.FirstOrDefaultAsync(delivery => delivery.Id == deliveryId);
@@ -213,11 +264,22 @@ namespace BooshiDAL.Repositories
             return await GetAllDeliveriesQuery().Where(delivery => delivery.Delivery.DeliveryPersonId == id).ToListAsync();
         }
 
+        /// <summary>
+        /// Get deliveries with certain status id by page number
+        /// </summary>
+        /// <param name="statusId">Delivery status id</param>
+        /// <param name="pageNum">Page number</param>
+        /// <returns>List of 10 or less deliveries by status id</returns>
         public async Task<IEnumerable<FullDelivery>> GetDeliveriesByStatusId(int statusId, int pageNum)
         {
             return await GetAllDeliveriesQuery().Where(x => x.Delivery.DeliveryStatusId == statusId).OrderByDescending(delivery => delivery.Delivery.Created).Skip(pageNum * 10 - 10).Take(10).ToListAsync();
         }
 
+        /// <summary>
+        /// Update delivery
+        /// </summary>
+        /// <param name="delivery">Delivery to update</param>
+        /// <returns>The updated delivery</returns>
         public async Task<FullDelivery> UpdateDeliveryAsync(FullDelivery delivery)
         {
             var foundDelivery = await _context.Deliveries.FirstOrDefaultAsync(d => d.Id == delivery.Delivery.Id);
@@ -244,7 +306,12 @@ namespace BooshiDAL.Repositories
             await _context.SaveChangesAsync();
             return new FullDelivery { Delivery = foundDelivery, Origin = foundOrigin, Destination = foundDestination };
         }
-
+        /// <summary>
+        /// Get certain delivery person's deliveries by page number
+        /// </summary>
+        /// <param name="id">Delivery person id</param>
+        /// <param name="pageNumber">Page number</param>
+        /// <returns>List of deliveries of delivery person</returns>
         public async Task<IEnumerable<FullDelivery>> GetDeliveriesByDeliveryPerson(Guid id, int pageNumber)
         {
             var deliveries = GetAllDeliveriesQuery().Where(X => X.Delivery.DeliveryPersonId == id).OrderByDescending(x => x.Delivery.Created).Skip(pageNumber * 10 - 10).Take(10);

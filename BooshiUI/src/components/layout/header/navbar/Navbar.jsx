@@ -21,7 +21,10 @@ const Navbar = (props) => {
 				'navbar navbar-expand-sm navbar-light row justify-content-between align-items-center header'
 			}>
 			<Link to='/' className='navbar-brand m-0 px-0 col-auto'>
-				<img className='booshi-icon' src={BooshiIcon}></img>
+				<img
+					className='booshi-icon'
+					src={BooshiIcon}
+					alt='Booshi icon'></img>
 			</Link>
 			<div className='row d-sm-none justify-content-end p-0'>
 				<button
@@ -41,6 +44,7 @@ const Navbar = (props) => {
 				<ul className='navbar-nav mt-lg-0 col-12 col-sm justify-content-center gap-8 text-center p-0 m-0'>
 					<NavLinks></NavLinks>
 				</ul>
+				{/* Checks if theres user connected, if not displaying the register and sign in buttons, else, displaying the user functionalities */}
 				{!props.auth.userData ? (
 					<div className='col-12 col-sm-auto row text-center p-0 m-0 justify-content-center align-items-center'>
 						<div className='col-12 col-sm-auto mb-2 mb-sm-0 p-1 mx-0 mx-sm-1 mr-lg-3'>
@@ -60,7 +64,6 @@ const Navbar = (props) => {
 							<button
 								className='btn btn-transparent col-12 col-sm-auto text-center nav-link'
 								id='navbarDropdown'
-								role='button'
 								data-toggle='dropdown'
 								aria-expanded='false'>
 								Hello, {props.auth.userData.userName}{' '}
@@ -69,6 +72,7 @@ const Navbar = (props) => {
 							<div
 								className='dropdown-menu dropdown-menu-right'
 								aria-labelledby='navbarDropdown'>
+								{/* Only for delivery person */}
 								{props.auth.userData.roleId === 2 && (
 									<Link
 										to='deliverypanel/new-deliveries'

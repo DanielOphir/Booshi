@@ -8,6 +8,11 @@ namespace BooshiDAL.Extensions
 {
     public static class HelperMethods
     {
+        /// <summary>
+        /// Generating random password
+        /// </summary>
+        /// <param name="length">Length of generated password</param>
+        /// <returns>string with the random password</returns>
         public static string GenerateRandomPassword(int length)
         {
             string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*";

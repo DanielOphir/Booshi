@@ -3,6 +3,7 @@ import { api } from '../../utils/helpers/AxiosHelper';
 import NetworkErrorPage from '../../views/errors/NetworkError/NetworkErrorPage';
 import Unauthorized from '../../views/errors/Unauthorized/Unauthorized';
 
+// Check every api call if it has been successful or not, if not, display the error page.
 const checkRequests = (Wrapped) => {
 	function CheckRequests(props) {
 		const [networkError, setNetworkError] = useState(false);
@@ -14,7 +15,7 @@ const checkRequests = (Wrapped) => {
 					return response;
 				},
 				function (error) {
-					if (error.message == 'Network Error') {
+					if (error.message === 'Network Error') {
 						console.log('Network Error');
 						setNetworkError(true);
 					}

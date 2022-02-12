@@ -12,7 +12,6 @@ namespace BooshiDAL.Interfaces
         public  Task<DeliveryPerson> AddDeliveryPersonAsync(Guid id);
         public  Task<bool> RemoveDeliveryPersonAsync(Guid id);
         public IQueryable<dynamic> GetAllDeliveryPeopleAsync();
-        public  Task<IEnumerable<FullUser>> GetDeliveryPeopleByActivityAsync(bool isActive);
 
     }
 }

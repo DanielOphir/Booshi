@@ -5,19 +5,20 @@ import * as $ from 'jquery';
 import { api } from '../../../utils/helpers/AxiosHelper';
 import { connect } from 'react-redux';
 import { loadingOff, loadingOn } from '../../../redux/loading/loadingActions';
-import { useLocation, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
+// Delivery details modal, used for users, delivery person, admin
 function DeliveryDetailsModal({
 	deliveryDetails,
 	pageNum,
 	getDeliveries,
 	...props
 }) {
-	const location = useLocation();
 	const admin = props.user?.roleId === 1;
 
 	const [deliveryPerson, setDeliveryPerson] = useState(null);
 
+	// When clicking on cancel delivery, close the details modal.
 	const deleteDialog = () => {
 		$('#detailsModal').modal('hide');
 	};
@@ -27,6 +28,7 @@ function DeliveryDetailsModal({
 		api.patch('/api/deliveries/cancel/' + deliveryDetails?.delivery?.id)
 			.then((response) => {
 				if (response.status === 200) {
+					// If cancel delivery was successful, close the delete modal and get the deliveries again.
 					$('#deleteModal').modal('hide');
 					props.loadingOff();
 				}
@@ -52,6 +54,7 @@ function DeliveryDetailsModal({
 		.on('show.bs.modal', function () {
 			if (deliveryDetails?.delivery?.deliveryPersonId) {
 				props.loadingOn();
+				// On delivery details modal opening, get the delivery person information.
 				api.get(
 					`api/users/${deliveryDetails.delivery.deliveryPersonId}`,
 				)

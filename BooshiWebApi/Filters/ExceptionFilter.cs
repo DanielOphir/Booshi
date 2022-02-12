@@ -10,6 +10,10 @@ namespace BooshiWebApi.Filters
 {
     public class ExceptionFilter : IExceptionFilter
     {
+        /// <summary>
+        /// Exception handler, checking which exception this is and returning the data to the front-end
+        /// </summary>
+        /// <param name="context"></param>
         public void OnException(ExceptionContext context)
         {
             Console.WriteLine(context.Exception.GetType());

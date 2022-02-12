@@ -1,6 +1,7 @@
 import React from 'react';
 import images from '../../utils/constants/images';
 
+// Displaying that there's no deliveries.
 const NoDeliveries = () => {
 	return (
 		<div className='container'>

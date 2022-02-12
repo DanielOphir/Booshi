@@ -16,12 +16,15 @@ namespace BooshiWebApi
     {
         public static async Task Main(string[] args)
         {
-            var host = CreateHostBuilder(args).Build();//.Run();
+            var host = CreateHostBuilder(args).Build();
+
+            // Creating a scope and getting the service provider
             using var scope = host.Services.CreateScope();
             var services = scope.ServiceProvider;
 
             try
             {
+                // Seeding data if there's no data in the db
                 var context = services.GetRequiredService<BooshiDBContext>();
 
                 await context.Database.MigrateAsync();

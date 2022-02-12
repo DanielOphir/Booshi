@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 
+// Main button component that will be used in all of the project
 class PrimaryButton extends Component {
 	constructor(props) {
 		super(props);

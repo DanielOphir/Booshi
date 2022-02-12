@@ -15,7 +15,7 @@ export const PendingDeliveries = () => {
 	return <DeliveriesTable admin apiUrl='api/deliveries/status/1/page/' />;
 };
 
-export const ShippedDeliveries = () => {
+export const InProcessDeliveries = () => {
 	return <DeliveriesTable admin apiUrl='api/deliveries/status/2/page/' />;
 };
 

@@ -18,6 +18,11 @@ namespace BooshiDAL.Repositories
             this._context = context;
         }
 
+        /// <summary>
+        /// Adding new delivery person to the database
+        /// </summary>
+        /// <param name="id">User id</param>
+        /// <returns>Delivery person</returns>
         public async Task<DeliveryPerson> AddDeliveryPersonAsync(Guid id)
         {
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
@@ -39,6 +44,11 @@ namespace BooshiDAL.Repositories
             return deliveryPerson;
         }
 
+        /// <summary>
+        /// Remove delivery person to the database
+        /// </summary>
+        /// <param name="id">User id</param>
+        /// <returns>Boolean whether the action succeed or failed</returns>
         public async Task<bool> RemoveDeliveryPersonAsync(Guid id)
         {
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
@@ -57,6 +67,10 @@ namespace BooshiDAL.Repositories
             return true;
         }
 
+        /// <summary>
+        /// Gets all of the delivery persons
+        /// </summary>
+        /// <returns>IQueryable form of all of the deliveries persons</returns>
         public IQueryable<dynamic> GetAllDeliveryPeopleAsync()
         {
             var deliveryPeople = (from _deliverypeople in _context.DeliveryPeople
@@ -66,14 +80,5 @@ namespace BooshiDAL.Repositories
             return deliveryPeople;
         }
 
-        public async Task<IEnumerable<FullUser>> GetDeliveryPeopleByActivityAsync(bool isActive)
-        {
-            var deliveryPeople = await (from _deliverypeople in _context.DeliveryPeople
-                                        join _user in _context.Users on _deliverypeople.UserId equals _user.Id
-                                        join _userDetails in _context.UsersDetails on _deliverypeople.UserId equals _userDetails.UserId
-                                        where _deliverypeople.IsActiveDeliveryPerson == isActive
-                                        select new FullUser(_user, _userDetails)).ToListAsync();
-            return deliveryPeople;
-        }
     }
 }

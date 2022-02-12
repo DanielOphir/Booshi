@@ -17,8 +17,9 @@ const RegisterTable = (props) => {
 	const [generalError, setGeneralError] = useState('');
 	const [id, setId] = useState(undefined);
 
+	// Get the rules schema wether it's register or update
 	let schema =
-		props.mode == 'update' || props.mode === 'settings'
+		props.mode === 'update' || props.mode === 'settings'
 			? updateSchema
 			: registerSchema;
 
@@ -41,8 +42,8 @@ const RegisterTable = (props) => {
 			api.get(url)
 				.then((response) => {
 					const user = response.data;
-					console.log(user.id);
 					setId(user?.id);
+					// If its update form, automaticly fill the form with the user data
 					reset({
 						userName: user.userName,
 						firstName: user.firstName,
@@ -163,6 +164,7 @@ const RegisterTable = (props) => {
 		}
 	};
 
+	// Get the input rows wether it's register or update
 	let rows =
 		props.mode === 'update' || props.mode === 'settings'
 			? updateRows

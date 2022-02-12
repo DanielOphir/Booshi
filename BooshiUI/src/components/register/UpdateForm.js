@@ -2,6 +2,7 @@ import * as yup from 'yup';
 
 const requiredError = 'This field is required.';
 
+// Rows for the register form when updating user.
 export const rows = [
 	{
 		formControls: [
@@ -68,6 +69,8 @@ export const rows = [
 		],
 	},
 ];
+
+// Rules for the inputs that in the register form when updating user.
 
 export const schema = yup.object().shape({
 	userName: yup

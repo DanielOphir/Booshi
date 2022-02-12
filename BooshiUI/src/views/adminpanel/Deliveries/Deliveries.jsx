@@ -41,12 +41,12 @@ const Deliveries = () => {
 					</li>
 					<li className='nav-item' role='presentation'>
 						<NavLink
-							to={'shipped'}
+							to={'in-process'}
 							className='nav-link'
 							id='shipped-tab'
 							data-toggle='tab'
 							role='tab'>
-							Shipped
+							In Process
 						</NavLink>
 					</li>
 					<li className='nav-item' role='presentation'>
@@ -85,8 +85,8 @@ const Deliveries = () => {
 					element={<FilteredDeliveries.PendingDeliveries />}
 				/>
 				<Route
-					path='shipped'
-					element={<FilteredDeliveries.ShippedDeliveries />}
+					path='in-process'
+					element={<FilteredDeliveries.InProcessDeliveries />}
 				/>
 				<Route
 					path='completed'
